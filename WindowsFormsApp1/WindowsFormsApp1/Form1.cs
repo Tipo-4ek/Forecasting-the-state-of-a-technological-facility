@@ -11,6 +11,7 @@ using System.Data.SQLite;
 using System.IO;
 
 
+
 namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
@@ -21,7 +22,7 @@ namespace WindowsFormsApp1
 
         private DataTable dTable;
         private DataTable par_dtable;
-        private DataTable imgTable;
+   
         public Form1()
         {
             InitializeComponent();
@@ -86,7 +87,7 @@ namespace WindowsFormsApp1
 
         private void button2_Click(object sender, EventArgs e)
         {
-            
+
             if (OpenDBFile() == true)
             {
                 string query = "SELECT data FROM `images` WHERE `id`= 1";
@@ -100,25 +101,35 @@ namespace WindowsFormsApp1
                 }
                 pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
                 pictureBox1.Image = new Bitmap(pictureBox1.Image);
-               /* par_dtable.Clear();
-                string pars = "SELECT value FROM `parameters`";*/
+                par_dtable.Clear();
+
                 ShowTable(SQL_ALLTable());
-              /*  //SQLiteCommand cmd1 = new SQLiteCommand(pars, SQLiteConn);
-                //SQLiteDataReader rdr1 = cmd1.ExecuteReader();
-                SQLiteDataAdapter par_adapter = new SQLiteDataAdapter(pars, SQLiteConn);
-                par_adapter.Fill(par_dtable);
-                string temp_val = Convert.ToString(par_dtable.Rows[0].ItemArray);
-                label3.Text = temp_val ;
-              *//*  while (rdr1.Read())
+                string pars = "SELECT * FROM `parameters`";
+                SQLiteCommand command = new SQLiteCommand(pars, SQLiteConn);
+                double par_e = -1;
+                double par_a = -1;
+                command.CommandText = "SELECT * FROM `parameters`";
+                DataTable data = new DataTable();
+                SQLiteDataAdapter adapter = new SQLiteDataAdapter(command);
+                adapter.Fill(data);
+                Console.WriteLine($"Прочитано {data.Rows.Count} записей из таблицы БД");
+                foreach (DataRow row in data.Rows)
                 {
-                    textBox1.Text = rdr1[0].ToString();
-                    textBox2.Text = rdr1[1].ToString();
+                    Console.WriteLine($"id = {row.Field<long>("id")} name = {row.Field<string>("name")} value = {row.Field<double>("value")}");
+                    if (row.Field<long>("id") == 1) { 
+                        label3.Text = "E = " + row.Field<double>("value").ToString();
+                        par_e = row.Field<double>("value");
+                    }
 
-                    }*/
-
-
+                    if (row.Field<long>("id") == 2) {
+                        label4.Text = "A = " + row.Field<double>("value").ToString();
+                        par_a = row.Field<double>("value");
+                    }
                 }
+
+               
             }
+        }
 
         private void button3_Click(object sender, EventArgs e) // Удаление
         {
@@ -166,5 +177,7 @@ namespace WindowsFormsApp1
             dataGridView1.Rows.Clear();
             ShowTable(SQL_ALLTable());
         }
+
+  
     }
 }

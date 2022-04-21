@@ -11,7 +11,6 @@ using System.Data.SQLite;
 using System.IO;
 
 
-
 namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
@@ -22,14 +21,20 @@ namespace WindowsFormsApp1
 
         private DataTable dTable;
         private DataTable par_dtable;
-   
+        ToolStripLabel ALabel;
+        ToolStripLabel ELabel;
+        double E;
+        double A;
         public Form1()
         {
             InitializeComponent();
+            ELabel = new ToolStripLabel();
+            ALabel = new ToolStripLabel();
 
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            this.Cursor = Cursors.Default;
             SQLiteConnectionConn = new SQLiteConnection();
             dTable = new DataTable();
             par_dtable = new DataTable();
@@ -61,7 +66,7 @@ namespace WindowsFormsApp1
         }
 
         private string SQL_ALLTable() { return "SELECT * FROM Данные order by 1"; }
-        private string SQL_ALLTable1() { return "SELECT value FROM `parameters`"; }
+        private string SQL_EATable1() { return "SELECT value FROM `parameters`"; }
 
         private void ShowTable(string SQLQuery)
         {
@@ -101,9 +106,10 @@ namespace WindowsFormsApp1
                 }
                 pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
                 pictureBox1.Image = new Bitmap(pictureBox1.Image);
-                par_dtable.Clear();
 
-                ShowTable(SQL_ALLTable());
+                statusStrip1.Items.Add(ELabel);
+                statusStrip1.Items.Add(ALabel);
+
                 string pars = "SELECT * FROM `parameters`";
                 SQLiteCommand command = new SQLiteCommand(pars, SQLiteConn);
                 double par_e = -1;
@@ -116,20 +122,23 @@ namespace WindowsFormsApp1
                 foreach (DataRow row in data.Rows)
                 {
                     Console.WriteLine($"id = {row.Field<long>("id")} name = {row.Field<string>("name")} value = {row.Field<double>("value")}");
-                    if (row.Field<long>("id") == 1) { 
-                        label3.Text = "E = " + row.Field<double>("value").ToString();
+                    if (row.Field<long>("id") == 1)
+                    {
+                        textBox1.Text = row.Field<double>("value").ToString();
+                        ELabel.Text = textBox1.Text + " , ";
                         par_e = row.Field<double>("value");
                     }
 
-                    if (row.Field<long>("id") == 2) {
-                        label4.Text = "A = " + row.Field<double>("value").ToString();
+                    if (row.Field<long>("id") == 2)
+                    {
+                        textBox2.Text = row.Field<double>("value").ToString();
+                        ALabel.Text = textBox2.Text;
                         par_a = row.Field<double>("value");
                     }
+                    ShowTable(SQL_ALLTable());
                 }
-
-               
             }
-        }
+            }
 
         private void button3_Click(object sender, EventArgs e) // Удаление
         {
@@ -178,6 +187,14 @@ namespace WindowsFormsApp1
             ShowTable(SQL_ALLTable());
         }
 
-  
+        private void button4_Click(object sender, EventArgs e)
+        {
+            ELabel.Text = textBox1.Text + " , ";
+            ALabel.Text = textBox2.Text;
+            E = Convert.ToDouble(textBox1.Text);
+            A = Convert.ToDouble(textBox2.Text);
+        }
+
+
     }
 }

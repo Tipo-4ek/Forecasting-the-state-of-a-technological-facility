@@ -23,8 +23,8 @@ namespace WindowsFormsApp1
         private DataTable par_dtable;
         ToolStripLabel ALabel;
         ToolStripLabel ELabel;
-        double E;
-        double A;
+        double par_E=-1;
+        double par_A=-1;
         public Form1()
         {
             InitializeComponent();
@@ -112,8 +112,6 @@ namespace WindowsFormsApp1
 
                 string pars = "SELECT * FROM `parameters`";
                 SQLiteCommand command = new SQLiteCommand(pars, SQLiteConn);
-                double par_e = -1;
-                double par_a = -1;
                 command.CommandText = "SELECT * FROM `parameters`";
                 DataTable data = new DataTable();
                 SQLiteDataAdapter adapter = new SQLiteDataAdapter(command);
@@ -126,14 +124,14 @@ namespace WindowsFormsApp1
                     {
                         textBox1.Text = row.Field<double>("value").ToString();
                         ELabel.Text = textBox1.Text + " , ";
-                        par_e = row.Field<double>("value");
+                        par_E = row.Field<double>("value");
                     }
 
                     if (row.Field<long>("id") == 2)
                     {
                         textBox2.Text = row.Field<double>("value").ToString();
                         ALabel.Text = textBox2.Text;
-                        par_a = row.Field<double>("value");
+                        par_A = row.Field<double>("value");
                     }
                     ShowTable(SQL_ALLTable());
                 }
@@ -191,10 +189,120 @@ namespace WindowsFormsApp1
         {
             ELabel.Text = textBox1.Text + " , ";
             ALabel.Text = textBox2.Text;
-            E = Convert.ToDouble(textBox1.Text);
-            A = Convert.ToDouble(textBox2.Text);
+            par_E = Convert.ToDouble(textBox1.Text);
+            par_A = Convert.ToDouble(textBox2.Text);
         }
 
+        private void Decomposition1()
+        {
+            string[] name = {"Эпоха","M","alfa","M+","M-","alfa+","alfa-","M(прогн)", "alfa(прогн)", "M+(прогн)", "M-(прогн)", "alfa+(прогн)", "alfa-(прогн)","R","L","Устойчивость"};
+            double M=0,M_plus=0,M_minus=0,alfa=0,alfa_plus=0,alfa_minus=0,M_prev=0,M_prev_plus=0,M_prev_minus=0, M_progn = 0, M_plus_progn = 0, M_minus_progn = 0, alfa_progn = 0, alfa_plus_progn = 0, alfa_minus_progn = 0,sum_M=0,sum_M_plus=0,sum_M_minus=0, M_progn_prev = 0;
 
+            double[,] decomp = new double[dataGridView1.Rows.Count, dataGridView1.Columns.Count];
+            dataGridView2.Columns.Clear();
+            dataGridView2.Rows.Clear();
+            for (int i = 0; i < 16; i++)
+            {
+                dataGridView2.Columns.Add(name[i],name[i]);
+                dataGridView2.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            }
+            for (int i = 0; i < dataGridView1.Rows.Count - 1; i++)
+            {
+                dataGridView2.Rows.Add(dataGridView1.Rows[i].Cells[0].Value); ;
+            }
+
+            for (int i = 0; i < dataGridView1.Rows.Count-1; i++) //M и alfa
+            {
+                for (int j = 1; j < dataGridView1.Columns.Count; j++)
+                {
+                    M += Math.Pow(Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value),2);
+                    M_plus += Math.Pow(Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) + par_E, 2);
+                    M_minus += Math.Pow(Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) - par_E, 2);
+
+                    alfa += Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) * Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value);
+                    alfa_plus += (Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value)+par_E) * (Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value)+par_E);
+                    //Console.WriteLine(Convert.ToString(Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) + par_E));
+                    alfa_minus+= (Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) - par_E) * (Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) - par_E);
+
+                    /*                        Console.WriteLine(Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value));
+                                            Console.WriteLine(Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value));*/
+
+                }
+                if (i == 0)
+                {
+                    /*Console.WriteLine("Присвоили М первой = {0}. Альфы = 0 ", Math.Sqrt(M));*/
+                    M_prev = M;
+                    M_prev_plus = M_plus;
+                    M_prev_minus = M_minus;
+                    alfa = 0;
+                    alfa_minus = 0;
+                    alfa_plus = 0;
+
+                }
+                else
+                {
+                    //Console.WriteLine("М первая {0}", Math.Sqrt(M_prev));
+                    //Console.WriteLine("М {0}", Math.Sqrt(M));
+                    
+                    alfa = alfa / (Math.Sqrt(M_prev) * Math.Sqrt(M));
+                   /* Console.WriteLine("alpa_plus = {0}", alfa_plus);*/
+                    alfa_plus = alfa_plus / (Math.Sqrt(M_prev_plus) * Math.Sqrt(M_plus));
+                    /*double temp = (Math.Sqrt(M_prev_plus) * Math.Sqrt(M_plus));
+                    Console.WriteLine("Делим это на {0} = {1}",temp, alfa_plus);*/
+                    alfa_minus = alfa_minus / (Math.Sqrt(M_prev_minus) * Math.Sqrt(M_minus));
+                    // Console.WriteLine("Альфа поделили {0}", alfa_plus);                
+                    alfa = Math.Acos(alfa);
+                   /* Console.WriteLine("Ща будем брать acos alfa ({0})", alfa_plus);*/
+                    alfa_plus = Math.Acos(alfa_plus);
+                  /*  Console.WriteLine("Взяли acos = {0}", alfa_plus);*/
+                    alfa_minus = Math.Acos(alfa_minus);
+                     //Console.WriteLine("Альфа косинус {0}", alfa_plus);
+                }
+         
+
+                dataGridView2.Rows[i].Cells[1].Value = Math.Sqrt(M);
+                dataGridView2.Rows[i].Cells[3].Value = Math.Sqrt(M_plus);
+                dataGridView2.Rows[i].Cells[4].Value = Math.Sqrt(M_minus);
+                dataGridView2.Rows[i].Cells[2].Value = alfa;
+                dataGridView2.Rows[i].Cells[5].Value = alfa_plus;
+                dataGridView2.Rows[i].Cells[6].Value = alfa_minus;
+                sum_M += Math.Sqrt(M);
+                sum_M_plus += Math.Sqrt(M_plus);
+                sum_M_minus += Math.Sqrt(M_minus);
+
+                M = 0;
+                M_plus = 0;
+                M_minus = 0;
+                alfa = 0;
+                alfa_plus = 0;
+                alfa_minus = 0;
+                
+            }
+            for (int i = 0; i < dataGridView1.Rows.Count - 1; i++) //M(прогн) и alfa(прогн)
+            {
+                if (i == 0)
+                {
+                    M_progn = par_A * Convert.ToDouble(dataGridView2.Rows[0].Cells[1].Value) + (1 - par_A) * (sum_M / (dataGridView2.Rows.Count - 1));
+                    dataGridView2.Rows[i].Cells[7].Value = M_progn;
+                    Console.WriteLine(Convert.ToDouble(dataGridView2.Rows[0].Cells[1].Value));
+                    M_progn_prev = M_progn;
+                    M_progn = 0;
+                }
+                else
+                {
+                    M_progn = par_A * Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value) + (1 - par_A) * M_progn_prev;
+                    dataGridView2.Rows[i].Cells[7].Value = M_progn;
+                    M_progn_prev = M_progn;
+                    M_progn = 0;
+                }
+
+            }
+                }
+
+        private void tabControl1_MouseClick(object sender, MouseEventArgs e)
+        {
+
+            Decomposition1();
+        }
     }
 }

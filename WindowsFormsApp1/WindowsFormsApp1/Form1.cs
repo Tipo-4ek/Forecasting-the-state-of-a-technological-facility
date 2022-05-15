@@ -30,13 +30,16 @@ namespace WindowsFormsApp1
         double alpha_minus_min = 0;
         double m_minus_min = 0;
         double m_minus_max = 0;
+        double decomp4_min = 999999;
+        double decomp4_max = -1;
         public Form1()
         {
             InitializeComponent();
             ELabel = new ToolStripLabel();
             ALabel = new ToolStripLabel();
             
-            
+
+
 
         }
         private void Form1_Load(object sender, EventArgs e)
@@ -45,6 +48,7 @@ namespace WindowsFormsApp1
             SQLiteConnectionConn = new SQLiteConnection();
             dTable = new DataTable();
             par_dtable = new DataTable();
+    
         }
 
         public Image ByteToImage(byte[] imageBytes)
@@ -94,6 +98,20 @@ namespace WindowsFormsApp1
             for (int row = 0; row < dTable.Rows.Count; row++)
             {
                 dataGridView1.Rows.Add(dTable.Rows[row].ItemArray);
+
+            }
+            for (int i = 1; i < dataGridView1.Rows.Count; i++)
+            {
+                //begin from 1 to kick column[0] - epocha
+                for (int j = 1; j < dataGridView1.Rows[i].Cells.Count; j++)
+                {
+                    double curr_val = Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value);
+
+                    if ((curr_val > decomp4_max) && ((curr_val > decomp4_min) || decomp4_max == -1))
+                        decomp4_max = curr_val;
+                    if ((curr_val < decomp4_min) && ((curr_val < decomp4_max) || decomp4_max == -1) && (curr_val != 0))
+                        decomp4_min = curr_val;
+                }
             }
         }
 
@@ -192,11 +210,17 @@ namespace WindowsFormsApp1
             dataGridView1.Rows.Clear();
             ShowTable(SQL_ALLTable());
         }
-        
-        public void CreateSerie(int cells_x, int cells_y, string inp_nameSerie, Chart inp_chartName, bool isNeedXCut, long koeff_umnozhenia, double y_min, double y_max)
+
+        public void charts_init(Chart inp_chart, double y_min, double y_max)
+        {
+            inp_chart.ChartAreas[0].AxisY.Minimum = y_min;
+            inp_chart.ChartAreas[0].AxisY.Maximum = y_max;
+        }
+
+        public void CreateSerie(int cells_x, int cells_y, string inp_nameSerie, Chart inp_chartName, bool isNeedXCut, long koeff_umnozhenia, double y_min, double y_max, DataGridView inp_datagrid)
         {
             double x, y;
-
+           
             string Serie1 = inp_nameSerie;
             //Console.WriteLine("------------------------------");
             //Console.WriteLine(inp_nameSerie);
@@ -206,24 +230,38 @@ namespace WindowsFormsApp1
             inp_chartName.Series[Serie1].Enabled = true;
             inp_chartName.Series[Serie1].BorderWidth = 2;
             inp_chartName.Series[Serie1].MarkerStyle = MarkerStyle.Circle;
-            inp_chartName.Series[Serie1].MarkerSize = 7;
             inp_chartName.Series[Serie1].MarkerColor = Color.Red;
-           
-            for (int p = 0; p < dataGridView2.Rows.Count - 2; p++)
+            inp_chartName.Series[Serie1].MarkerSize = 4;
+            
+            if (inp_chartName == chart1) {
+                inp_chartName.ChartAreas[0].AxisX.Title = "m";
+                inp_chartName.ChartAreas[0].AxisY.Title = "alpha";
+            }
+            if (inp_chartName == chart2)
+            {
+                inp_chartName.ChartAreas[0].AxisX.Title = "m";
+                inp_chartName.ChartAreas[0].AxisY.Title = "t";
+            }
+            for (int p = 0; p < inp_datagrid.Rows.Count - 2; p++)
             {
 
                
-                x = Convert.ToDouble(dataGridView2.Rows[p].Cells[cells_x].Value);
+                x = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_x].Value);
                 if (isNeedXCut) 
                     x = x - x % 0.0001;
-                y = Convert.ToDouble(dataGridView2.Rows[p].Cells[cells_y].Value) * koeff_umnozhenia;
+                y = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_y].Value) * koeff_umnozhenia;
 
                 //Console.WriteLine("\n" + inp_nameSerie + " - " + x + " | " + y);
                 inp_chartName.Series[Serie1].Points.AddXY(x, y);
+                inp_chartName.Series[Serie1].Points[p].Label = Convert.ToString(p);
+       
+
             }
             //Console.WriteLine("------------------------------");
-            inp_chartName.ChartAreas[0].AxisY.Minimum = y_min;
-            inp_chartName.ChartAreas[0].AxisY.Maximum = y_max;
+            //inp_chartName.ChartAreas[0].AxisY.Minimum = y_min;
+            //inp_chartName.ChartAreas[0].AxisY.Maximum = y_max;
+            //inp_chartName.ChartAreas[0].AxisY.Minimum = 48;
+            //inp_chartName.ChartAreas[0].AxisY.Maximum = 49;
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -249,6 +287,7 @@ namespace WindowsFormsApp1
             double[,] decomp = new double[dataGridView1.Rows.Count, dataGridView1.Columns.Count];
             dataGridView2.Columns.Clear();
             dataGridView2.Rows.Clear();
+            
             for (int i = 0; i <name.Length; i++)
             {
                 dataGridView2.Columns.Add(name[i], name[i]);
@@ -256,9 +295,12 @@ namespace WindowsFormsApp1
             }
             for (int i = 0; i < dataGridView1.Rows.Count - 1; i++)
             {
-                dataGridView2.Rows.Add(dataGridView1.Rows[i].Cells[0].Value); ;
+                dataGridView2.Rows.Add(dataGridView1.Rows[i].Cells[0].Value);
+
+       
             }
             dataGridView2.Rows.Add("Прогноз");
+
             for (int i = 0; i < dataGridView1.Rows.Count - 1; i++) //M и alfa
             {
                 for (int j = 1; j < dataGridView1.Columns.Count; j++)
@@ -299,11 +341,11 @@ namespace WindowsFormsApp1
                     Console.WriteLine("Делим это на {0} = {1}",temp, alfa_plus);*/
                     alfa_minus = alfa_minus / (Math.Sqrt(M_prev_minus) * Math.Sqrt(M_minus));
                     // Console.WriteLine("Альфа поделили {0}", alfa_plus);                
-                    alfa = Math.Acos(alfa);
+                    alfa = Math.Acos(alfa)*3600;
                     /* Console.WriteLine("Ща будем брать acos alfa ({0})", alfa_plus);*/
-                    alfa_plus = Math.Acos(alfa_plus);
+                    alfa_plus = Math.Acos(alfa_plus)*3600;
                     /*  Console.WriteLine("Взяли acos = {0}", alfa_plus);*/
-                    alfa_minus = Math.Acos(alfa_minus);
+                    alfa_minus = Math.Acos(alfa_minus)*3600;
                     //Console.WriteLine("Альфа косинус {0}", alfa_plus);
                 }
 
@@ -314,9 +356,9 @@ namespace WindowsFormsApp1
                 dataGridView2.Rows[i].Cells[1].Value = Math.Round(Math.Sqrt(M),4);
                 dataGridView2.Rows[i].Cells[3].Value = Math.Round(Math.Sqrt(M_plus), 4);
                 dataGridView2.Rows[i].Cells[4].Value = Math.Round(Math.Sqrt(M_minus), 4);
-                dataGridView2.Rows[i].Cells[2].Value = alfa * 3600;
-                dataGridView2.Rows[i].Cells[5].Value = alfa_plus * 3600;
-                dataGridView2.Rows[i].Cells[6].Value = alfa_minus * 3600;
+                dataGridView2.Rows[i].Cells[2].Value = alfa;
+                dataGridView2.Rows[i].Cells[5].Value = alfa_plus;
+                dataGridView2.Rows[i].Cells[6].Value = alfa_minus;
                 sum_M += Math.Sqrt(M);
                 sum_M_plus += Math.Sqrt(M_plus);
                 sum_M_minus += Math.Sqrt(M_minus);
@@ -485,23 +527,32 @@ namespace WindowsFormsApp1
                 checkedListBox1.SetItemChecked(x, true);
             }
             checkedListBox1.SelectedItem = 1;
-
+            Decomposition2();
             }
+
 
         private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            charts_init(chart1, alpha_minus_min, alpha_plus_max);
+            charts_init(chart2, alpha_minus_min, alpha_plus_max);
+            charts_init(chart3, m_minus_min, m_minus_max);
+
+            chart1.Series.Clear();
+            chart2.Series.Clear();
+            chart3.Series.Clear();
             if (checkedListBox1.CheckedItems.Count != 0)
             {
                 // If so, loop through all checked items and print results.
-                chart1.Series.Clear();
-                chart2.Series.Clear();
-                chart3.Series.Clear();
-                CreateSerie(0, 2, "alp", chart2, false, 10000, alpha_minus_min, alpha_plus_max);
-                CreateSerie(0, 5, "alp+", chart2, false, 10000, alpha_minus_min, alpha_plus_max);
-                CreateSerie(0, 6, "alp-", chart2, false, 10000, alpha_minus_min, alpha_plus_max);
-                CreateSerie(0, 1, "t_m", chart3, false, 1, m_minus_min, m_minus_max);
-                CreateSerie(0, 3, "t_m+", chart3, false, 1, m_minus_min, m_minus_max);
-                CreateSerie(0, 4, "t_m-", chart3, false, 1, m_minus_min, m_minus_max);
+                Console.WriteLine("alpha_minus_min {0}", alpha_minus_min);
+                Console.WriteLine("alpha_plus_max {0}", alpha_plus_max);
+                Console.WriteLine("m_minus_min {0}", m_minus_min);
+                Console.WriteLine("m_minus_max {0}", m_minus_max);
+                 CreateSerie(0, 2, "alp", chart2, false, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                 CreateSerie(0, 5, "alp+", chart2, false, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                 CreateSerie(0, 6, "alp-", chart2, false, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                 CreateSerie(0, 1, "t_m", chart3, false, 1, m_minus_min, m_minus_max, dataGridView2);
+                 CreateSerie(0, 3, "t_m+", chart3, false, 1, m_minus_min, m_minus_max, dataGridView2);
+                 CreateSerie(0, 4, "t_m-", chart3, false, 1, m_minus_min, m_minus_max, dataGridView2);
 
                 for (int x = 0; x < checkedListBox1.Items.Count; x++)
                 {
@@ -511,22 +562,43 @@ namespace WindowsFormsApp1
                         switch (x)
                         {
                             case 0:
-                                CreateSerie(1, 2, "m_alpha", chart1, true, 1, alpha_minus_min, alpha_plus_max);
+                                CreateSerie(1, 2, "m_alpha", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
                                 break;
                             case 1:
-                                CreateSerie(3, 5, "m+_alpha+", chart1, true, 1, alpha_minus_min, alpha_plus_max);
+                                CreateSerie(3, 5, "m+_alpha+", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
 
                                 break;
                             case 2:
-                                CreateSerie(4, 6, "m-_alpha-", chart1, true, 1, alpha_minus_min, alpha_plus_max);
+                                CreateSerie(4, 6, "m-_alpha-", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
                                 break;
                             case 3:
-                                CreateSerie(7, 8, "mprogn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max);
+                                CreateSerie(7, 8, "mprogn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
                                 break;
+                            case 4:
+                                CreateSerie(9, 11, "9_11", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                break;
+                            case 5:
+                                CreateSerie(10, 12, "10_12", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                break;
+
                         }
                     }
                 }
 
+            }
+        }
+        private void checkedListBox3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            chart6.Series.Clear();
+            Console.WriteLine("decomp4_min {0}", decomp4_min);
+            Console.WriteLine("decomp4_max {0}", decomp4_max);
+            charts_init(chart6, decomp4_min, decomp4_max);
+            for (int x = 0; x < checkedListBox3.Items.Count; x++)
+            {
+                if (checkedListBox3.GetItemChecked(x))
+                {
+                    CreateSerie(0, x, Convert.ToString(x), chart6, true, 1, alpha_minus_min, alpha_plus_max, dataGridView1);
+                }
             }
         }
         private void Decomposition2()
@@ -542,7 +614,7 @@ namespace WindowsFormsApp1
             }
             pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox2.Image = new Bitmap(pictureBox1.Image);
-
+            
 
 
         }
@@ -713,11 +785,11 @@ namespace WindowsFormsApp1
                     Console.WriteLine("Делим это на {0} = {1}",temp, alfa_plus);*/
                     alfa_minus = alfa_minus / (Math.Sqrt(M_prev_minus) * Math.Sqrt(M_minus));
                     // Console.WriteLine("Альфа поделили {0}", alfa_plus);                
-                    alfa = Math.Acos(alfa);
+                    alfa = Math.Acos(alfa)*3600;
                     /* Console.WriteLine("Ща будем брать acos alfa ({0})", alfa_plus);*/
-                    alfa_plus = Math.Acos(alfa_plus);
+                    alfa_plus = Math.Acos(alfa_plus)*3600;
                     /*  Console.WriteLine("Взяли acos = {0}", alfa_plus);*/
-                    alfa_minus = Math.Acos(alfa_minus);
+                    alfa_minus = Math.Acos(alfa_minus)*3600;
                     //Console.WriteLine("Альфа косинус {0}", alfa_plus);
                 }
 
@@ -725,9 +797,9 @@ namespace WindowsFormsApp1
                 dataGridView4.Rows[i].Cells[1].Value = Math.Sqrt(M);
                 dataGridView4.Rows[i].Cells[3].Value = Math.Sqrt(M_plus);
                 dataGridView4.Rows[i].Cells[4].Value = Math.Sqrt(M_minus);
-                dataGridView4.Rows[i].Cells[2].Value = alfa * 3600;
-                dataGridView4.Rows[i].Cells[5].Value = alfa_plus * 3600;
-                dataGridView4.Rows[i].Cells[6].Value = alfa_minus * 3600;
+                dataGridView4.Rows[i].Cells[2].Value = alfa;
+                dataGridView4.Rows[i].Cells[5].Value = alfa_plus;
+                dataGridView4.Rows[i].Cells[6].Value = alfa_minus;
                 sum_M += Math.Sqrt(M);
                 sum_M_plus += Math.Sqrt(M_plus);
                 sum_M_minus += Math.Sqrt(M_minus);
@@ -870,6 +942,61 @@ namespace WindowsFormsApp1
                 dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[15].Value = "Аварийное";
             }
 
+        }
+
+        private void tabControl1_TabIndexChanged(object sender, EventArgs e)
+        {
+            checkedListBox3.Items.Clear();
+            for (int i = 1; i < dataGridView1.Columns.Count; i++)
+            {
+                checkedListBox3.Items.Add(Convert.ToString(i));
+            }
+            Console.WriteLine("Запихнули checkedListBox3");
+        }
+
+        private void checkedListBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            chart3.Series.Clear();
+            chart4.Series.Clear();
+            chart5.Series.Clear();
+            
+
+
+            for (int x = 0; x < checkedListBox2.Items.Count; x++)
+            {
+                if (checkedListBox2.GetItemChecked(x))
+                {
+
+                    switch (x)
+                    {
+                        case 0:
+                            CreateSerie(1, 2, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            break;
+                        case 1:
+                            CreateSerie(3, 5, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            break;
+                        case 2:
+                            CreateSerie(4, 6, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            break;
+                        case 3:
+                            CreateSerie(7, 8, checkedListBox2.Items[x].ToString(), chart4, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            break;
+                        case 4:
+                            CreateSerie(9, 11, checkedListBox2.Items[x].ToString(), chart4, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            break;
+                        case 5:
+                            CreateSerie(10, 12, checkedListBox2.Items[x].ToString(), chart4, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            break;
+                        case 6:
+                            CreateSerie(0, 1, checkedListBox2.Items[x].ToString(), chart5, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            CreateSerie(0, 3, checkedListBox2.Items[x].ToString() + "_", chart5, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            CreateSerie(0, 4, checkedListBox2.Items[x].ToString() + "__", chart5, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            break;
+                        
+
+                    }
+                }
+            }
         }
     }
 }

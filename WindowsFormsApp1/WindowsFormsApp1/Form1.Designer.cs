@@ -44,6 +44,8 @@ namespace WindowsFormsApp1
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend5 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend6 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.button2 = new System.Windows.Forms.Button();
@@ -88,6 +90,8 @@ namespace WindowsFormsApp1
             this.checkedListBox2 = new System.Windows.Forms.CheckedListBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.checkedListBox3 = new System.Windows.Forms.CheckedListBox();
+            this.chart6 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -109,6 +113,8 @@ namespace WindowsFormsApp1
             ((System.ComponentModel.ISupportInitialize)(this.chart5)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart3)).BeginInit();
+            this.tabPage5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chart6)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -143,7 +149,6 @@ namespace WindowsFormsApp1
             this.pictureBox1.Size = new System.Drawing.Size(437, 244);
             this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
-            this.pictureBox1.UseWaitCursor = false;
             // 
             // button2
             // 
@@ -154,7 +159,6 @@ namespace WindowsFormsApp1
             this.button2.TabIndex = 3;
             this.button2.Text = "Загрузить Данные";
             this.button2.UseVisualStyleBackColor = true;
-            this.button2.UseWaitCursor = false;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // tabControl1
@@ -165,12 +169,14 @@ namespace WindowsFormsApp1
             this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Cursor = System.Windows.Forms.Cursors.Default;
-            this.tabControl1.Location = new System.Drawing.Point(3, 12);
+            this.tabControl1.Location = new System.Drawing.Point(0, 12);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1857, 913);
             this.tabControl1.TabIndex = 4;
+            this.tabControl1.TabIndexChanged += new System.EventHandler(this.tabControl1_TabIndexChanged);
+            this.tabControl1.Click += new System.EventHandler(this.tabControl1_TabIndexChanged);
             this.tabControl1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.tabControl1_MouseClick);
             // 
             // tabPage1
@@ -213,7 +219,6 @@ namespace WindowsFormsApp1
             this.label2.Size = new System.Drawing.Size(29, 17);
             this.label2.TabIndex = 10;
             this.label2.Text = "A =";
-            this.label2.UseWaitCursor = false;
             // 
             // label1
             // 
@@ -223,7 +228,6 @@ namespace WindowsFormsApp1
             this.label1.Size = new System.Drawing.Size(29, 17);
             this.label1.TabIndex = 9;
             this.label1.Text = "E =";
-            this.label1.UseWaitCursor = false;
             // 
             // textBox2
             // 
@@ -232,7 +236,6 @@ namespace WindowsFormsApp1
             this.textBox2.Name = "textBox2";
             this.textBox2.Size = new System.Drawing.Size(131, 22);
             this.textBox2.TabIndex = 8;
-            this.textBox2.UseWaitCursor = false;
             // 
             // textBox1
             // 
@@ -241,7 +244,6 @@ namespace WindowsFormsApp1
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(131, 22);
             this.textBox1.TabIndex = 7;
-            this.textBox1.UseWaitCursor = false;
             // 
             // button3
             // 
@@ -252,7 +254,6 @@ namespace WindowsFormsApp1
             this.button3.TabIndex = 6;
             this.button3.Text = "Удалить строку";
             this.button3.UseVisualStyleBackColor = true;
-            this.button3.UseWaitCursor = false;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // button1
@@ -264,7 +265,6 @@ namespace WindowsFormsApp1
             this.button1.TabIndex = 5;
             this.button1.Text = "Добавить строку";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.UseWaitCursor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // tabPage2
@@ -281,7 +281,6 @@ namespace WindowsFormsApp1
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "1 уровень";
             this.tabPage2.UseVisualStyleBackColor = true;
-            this.tabPage2.UseWaitCursor = false;
             // 
             // checkedListBox1
             // 
@@ -290,13 +289,14 @@ namespace WindowsFormsApp1
             "m, alpha",
             "m+,alpha+",
             "m-,alpha- ",
-            "m_pr,alpha_pr"});
+            "m_pr,alpha_pr",
+            "9-11",
+            "10-12"});
             this.checkedListBox1.Location = new System.Drawing.Point(15, 21);
             this.checkedListBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.checkedListBox1.Name = "checkedListBox1";
             this.checkedListBox1.Size = new System.Drawing.Size(212, 225);
             this.checkedListBox1.TabIndex = 3;
-            this.checkedListBox1.UseWaitCursor = false;
             this.checkedListBox1.SelectedIndexChanged += new System.EventHandler(this.checkedListBox1_SelectedIndexChanged);
             // 
             // chart2
@@ -305,13 +305,12 @@ namespace WindowsFormsApp1
             this.chart2.ChartAreas.Add(chartArea1);
             legend1.Name = "Legend1";
             this.chart2.Legends.Add(legend1);
-            this.chart2.Location = new System.Drawing.Point(760, 298);
+            this.chart2.Location = new System.Drawing.Point(988, 321);
             this.chart2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chart2.Name = "chart2";
-            this.chart2.Size = new System.Drawing.Size(565, 346);
+            this.chart2.Size = new System.Drawing.Size(778, 545);
             this.chart2.TabIndex = 2;
             this.chart2.Text = "chart2";
-            this.chart2.UseWaitCursor = false;
             // 
             // chart1
             // 
@@ -319,13 +318,12 @@ namespace WindowsFormsApp1
             this.chart1.ChartAreas.Add(chartArea2);
             legend2.Name = "Legend1";
             this.chart1.Legends.Add(legend2);
-            this.chart1.Location = new System.Drawing.Point(233, 298);
+            this.chart1.Location = new System.Drawing.Point(63, 321);
             this.chart1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(573, 368);
+            this.chart1.Size = new System.Drawing.Size(896, 545);
             this.chart1.TabIndex = 1;
             this.chart1.Text = "chart1";
-            this.chart1.UseWaitCursor = false;
             // 
             // dataGridView2
             // 
@@ -337,7 +335,6 @@ namespace WindowsFormsApp1
             this.dataGridView2.RowTemplate.Height = 24;
             this.dataGridView2.Size = new System.Drawing.Size(1608, 287);
             this.dataGridView2.TabIndex = 0;
-            this.dataGridView2.UseWaitCursor = false;
             // 
             // tabPage3
             // 
@@ -349,7 +346,6 @@ namespace WindowsFormsApp1
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "2 уровень";
             this.tabPage3.UseVisualStyleBackColor = true;
-            this.tabPage3.UseWaitCursor = false;
             // 
             // tabControl2
             // 
@@ -361,7 +357,6 @@ namespace WindowsFormsApp1
             this.tabControl2.SelectedIndex = 0;
             this.tabControl2.Size = new System.Drawing.Size(1770, 878);
             this.tabControl2.TabIndex = 0;
-            this.tabControl2.UseWaitCursor = false;
             this.tabControl2.MouseClick += new System.Windows.Forms.MouseEventHandler(this.tabControl2_MouseClick);
             // 
             // tabPage6
@@ -389,7 +384,6 @@ namespace WindowsFormsApp1
             this.tabPage6.TabIndex = 0;
             this.tabPage6.Text = "Данные";
             this.tabPage6.UseVisualStyleBackColor = true;
-            this.tabPage6.UseWaitCursor = false;
             // 
             // button8
             // 
@@ -399,7 +393,6 @@ namespace WindowsFormsApp1
             this.button8.TabIndex = 14;
             this.button8.Text = "<-";
             this.button8.UseVisualStyleBackColor = true;
-            this.button8.UseWaitCursor = false;
             this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
             // button7
@@ -410,7 +403,6 @@ namespace WindowsFormsApp1
             this.button7.TabIndex = 13;
             this.button7.Text = "->";
             this.button7.UseVisualStyleBackColor = true;
-            this.button7.UseWaitCursor = false;
             this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
             // button6
@@ -422,7 +414,6 @@ namespace WindowsFormsApp1
             this.button6.TabIndex = 1;
             this.button6.Text = "Выбрать";
             this.button6.UseVisualStyleBackColor = true;
-            this.button6.UseWaitCursor = false;
             this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // label8
@@ -434,7 +425,6 @@ namespace WindowsFormsApp1
             this.label8.Size = new System.Drawing.Size(266, 32);
             this.label8.TabIndex = 12;
             this.label8.Text = "КОЛ-ВО БЛОКОВ";
-            this.label8.UseWaitCursor = false;
             // 
             // label7
             // 
@@ -445,7 +435,6 @@ namespace WindowsFormsApp1
             this.label7.Size = new System.Drawing.Size(282, 36);
             this.label7.TabIndex = 11;
             this.label7.Text = "ТАБЛИЦА ВЫСОТ";
-            this.label7.UseWaitCursor = false;
             // 
             // label6
             // 
@@ -456,7 +445,6 @@ namespace WindowsFormsApp1
             this.label6.Size = new System.Drawing.Size(139, 38);
             this.label6.TabIndex = 10;
             this.label6.Text = "СХЕМА";
-            this.label6.UseWaitCursor = false;
             // 
             // textBox3
             // 
@@ -464,7 +452,6 @@ namespace WindowsFormsApp1
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(309, 22);
             this.textBox3.TabIndex = 9;
-            this.textBox3.UseWaitCursor = false;
             // 
             // label5
             // 
@@ -475,7 +462,6 @@ namespace WindowsFormsApp1
             this.label5.Size = new System.Drawing.Size(265, 36);
             this.label5.TabIndex = 8;
             this.label5.Text = "ВЫБРАТЬ БЛОК:";
-            this.label5.UseWaitCursor = false;
             // 
             // label4
             // 
@@ -486,7 +472,6 @@ namespace WindowsFormsApp1
             this.label4.Size = new System.Drawing.Size(270, 29);
             this.label4.TabIndex = 7;
             this.label4.Text = "ВЫБРАННЫЕ МЕТКИ";
-            this.label4.UseWaitCursor = false;
             // 
             // label3
             // 
@@ -497,7 +482,6 @@ namespace WindowsFormsApp1
             this.label3.Size = new System.Drawing.Size(273, 51);
             this.label3.TabIndex = 6;
             this.label3.Text = "ВСЕ МЕТКИ";
-            this.label3.UseWaitCursor = false;
             // 
             // dataGridView3
             // 
@@ -508,7 +492,6 @@ namespace WindowsFormsApp1
             this.dataGridView3.RowTemplate.Height = 24;
             this.dataGridView3.Size = new System.Drawing.Size(810, 366);
             this.dataGridView3.TabIndex = 5;
-            this.dataGridView3.UseWaitCursor = false;
             // 
             // pictureBox2
             // 
@@ -517,7 +500,6 @@ namespace WindowsFormsApp1
             this.pictureBox2.Size = new System.Drawing.Size(495, 265);
             this.pictureBox2.TabIndex = 4;
             this.pictureBox2.TabStop = false;
-            this.pictureBox2.UseWaitCursor = false;
             // 
             // comboBox1
             // 
@@ -526,7 +508,6 @@ namespace WindowsFormsApp1
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(309, 24);
             this.comboBox1.TabIndex = 3;
-            this.comboBox1.UseWaitCursor = false;
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // button5
@@ -537,7 +518,6 @@ namespace WindowsFormsApp1
             this.button5.TabIndex = 2;
             this.button5.Text = "Применить";
             this.button5.UseVisualStyleBackColor = true;
-            this.button5.UseWaitCursor = false;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // listBox2
@@ -548,7 +528,6 @@ namespace WindowsFormsApp1
             this.listBox2.Name = "listBox2";
             this.listBox2.Size = new System.Drawing.Size(302, 500);
             this.listBox2.TabIndex = 1;
-            this.listBox2.UseWaitCursor = false;
             // 
             // listBox1
             // 
@@ -558,7 +537,6 @@ namespace WindowsFormsApp1
             this.listBox1.Name = "listBox1";
             this.listBox1.Size = new System.Drawing.Size(293, 612);
             this.listBox1.TabIndex = 0;
-            this.listBox1.UseWaitCursor = false;
             // 
             // tabPage7
             // 
@@ -574,7 +552,6 @@ namespace WindowsFormsApp1
             this.tabPage7.TabIndex = 1;
             this.tabPage7.Text = "Расчеты";
             this.tabPage7.UseVisualStyleBackColor = true;
-            this.tabPage7.UseWaitCursor = false;
             // 
             // dataGridView4
             // 
@@ -585,7 +562,6 @@ namespace WindowsFormsApp1
             this.dataGridView4.RowTemplate.Height = 24;
             this.dataGridView4.Size = new System.Drawing.Size(935, 366);
             this.dataGridView4.TabIndex = 4;
-            this.dataGridView4.UseWaitCursor = false;
             // 
             // chart5
             // 
@@ -602,7 +578,6 @@ namespace WindowsFormsApp1
             this.chart5.Size = new System.Drawing.Size(630, 433);
             this.chart5.TabIndex = 3;
             this.chart5.Text = "chart5";
-            this.chart5.UseWaitCursor = false;
             // 
             // chart4
             // 
@@ -619,7 +594,6 @@ namespace WindowsFormsApp1
             this.chart4.Size = new System.Drawing.Size(633, 383);
             this.chart4.TabIndex = 2;
             this.chart4.Text = "chart4";
-            this.chart4.UseWaitCursor = false;
             // 
             // chart3
             // 
@@ -636,7 +610,6 @@ namespace WindowsFormsApp1
             this.chart3.Size = new System.Drawing.Size(668, 380);
             this.chart3.TabIndex = 1;
             this.chart3.Text = "chart3";
-            this.chart3.UseWaitCursor = false;
             // 
             // checkedListBox2
             // 
@@ -647,15 +620,14 @@ namespace WindowsFormsApp1
             "M+",
             "M-",
             "М(прогн)",
-            "a",
-            "M(t)",
-            "M+(t)",
-            "M-(t)"});
+            "M+(прогн)",
+            "M-(прогн)",
+            "M(t)1"});
             this.checkedListBox2.Location = new System.Drawing.Point(6, 6);
             this.checkedListBox2.Name = "checkedListBox2";
             this.checkedListBox2.Size = new System.Drawing.Size(218, 367);
             this.checkedListBox2.TabIndex = 0;
-            this.checkedListBox2.UseWaitCursor = false;
+            this.checkedListBox2.SelectedIndexChanged += new System.EventHandler(this.checkedListBox2_SelectedIndexChanged);
             // 
             // tabPage4
             // 
@@ -666,10 +638,11 @@ namespace WindowsFormsApp1
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "3 уровень";
             this.tabPage4.UseVisualStyleBackColor = true;
-            this.tabPage4.UseWaitCursor = false;
             // 
             // tabPage5
             // 
+            this.tabPage5.Controls.Add(this.checkedListBox3);
+            this.tabPage5.Controls.Add(this.chart6);
             this.tabPage5.Location = new System.Drawing.Point(4, 25);
             this.tabPage5.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tabPage5.Name = "tabPage5";
@@ -677,7 +650,29 @@ namespace WindowsFormsApp1
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "4 уровень";
             this.tabPage5.UseVisualStyleBackColor = true;
-            this.tabPage5.UseWaitCursor = false;
+            // 
+            // checkedListBox3
+            // 
+            this.checkedListBox3.FormattingEnabled = true;
+            this.checkedListBox3.Location = new System.Drawing.Point(0, 12);
+            this.checkedListBox3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.checkedListBox3.Name = "checkedListBox3";
+            this.checkedListBox3.Size = new System.Drawing.Size(212, 531);
+            this.checkedListBox3.TabIndex = 4;
+            this.checkedListBox3.SelectedIndexChanged += new System.EventHandler(this.checkedListBox3_SelectedIndexChanged);
+            // 
+            // chart6
+            // 
+            chartArea6.Name = "ChartArea1";
+            this.chart6.ChartAreas.Add(chartArea6);
+            legend6.Name = "Legend1";
+            this.chart6.Legends.Add(legend6);
+            this.chart6.Location = new System.Drawing.Point(227, 2);
+            this.chart6.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.chart6.Name = "chart6";
+            this.chart6.Size = new System.Drawing.Size(1502, 660);
+            this.chart6.TabIndex = 2;
+            this.chart6.Text = "chart6";
             // 
             // statusStrip1
             // 
@@ -736,6 +731,8 @@ namespace WindowsFormsApp1
             ((System.ComponentModel.ISupportInitialize)(this.chart5)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart3)).EndInit();
+            this.tabPage5.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chart6)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -792,6 +789,8 @@ namespace WindowsFormsApp1
         private System.Windows.Forms.CheckedListBox checkedListBox2;
         private System.Windows.Forms.Button button8;
         private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chart6;
+        private System.Windows.Forms.CheckedListBox checkedListBox3;
     }
 }
 

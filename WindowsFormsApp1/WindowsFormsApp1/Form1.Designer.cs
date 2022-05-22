@@ -666,6 +666,7 @@ namespace WindowsFormsApp1
             chartArea6.Name = "ChartArea1";
             this.chart6.ChartAreas.Add(chartArea6);
             legend6.Name = "Legend1";
+            legend6.Title = "Выбранные метки";
             this.chart6.Legends.Add(legend6);
             this.chart6.Location = new System.Drawing.Point(227, 2);
             this.chart6.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);

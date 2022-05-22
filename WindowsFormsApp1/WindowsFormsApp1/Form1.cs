@@ -291,8 +291,24 @@ namespace WindowsFormsApp1
         {
             ELabel.Text = textBox1.Text + " , ";
             ALabel.Text = textBox2.Text;
-            par_E = Convert.ToDouble(textBox1.Text);
-            par_A = Convert.ToDouble(textBox2.Text);
+            try
+            {
+                par_E = Convert.ToDouble(textBox1.Text);
+            }
+            catch (Exception e1)
+            {
+                MessageBox.Show("Ошибка в параметре E. На вход принимаются только числа\nДействие не выполнено.");
+            }
+            try
+            {
+                par_A = Convert.ToDouble(textBox2.Text);
+            }
+            catch (Exception e2)
+            {
+                MessageBox.Show("Ошибка в параметре A. На вход принимаются только числа.\nДействие не выполнено.");
+            }
+
+           
         }
 
         public void Decomposition1()
@@ -730,8 +746,9 @@ namespace WindowsFormsApp1
 
             //Получаем в формате "Блок A"
             string cur_block = Convert.ToString(comboBox1.SelectedItem);
-            
-            
+
+            try
+            {
                 listBox2.Items.Add(listBox1.SelectedItem);
                 if (last_points_str != "")
                     last_points_str += ",";
@@ -741,7 +758,11 @@ namespace WindowsFormsApp1
 
                 listBox1.Items.Remove(listBox1.SelectedItem);
                 sort_listbox2();
-
+            }
+            catch (Exception e11)
+            {
+                MessageBox.Show("Ошибка в перемещении элементов. Проверьте, что вы выделили точку.");
+            }
 
 
 
@@ -773,25 +794,31 @@ namespace WindowsFormsApp1
 
         private void button8_Click(object sender, EventArgs e)
         {
-            double temp = 0;
-            listBox1.Items.Add(listBox2.SelectedItem);
-            listBox2.Items.Remove(listBox2.SelectedItem);
-            if (listBox1.Items.Count > 1)
+            try
             {
-                for (int i = 0; i < listBox1.Items.Count; i++)
+                double temp = 0;
+                listBox1.Items.Add(listBox2.SelectedItem);
+                listBox2.Items.Remove(listBox2.SelectedItem);
+                if (listBox1.Items.Count > 1)
                 {
-                    for (int j = i + 1; j < listBox1.Items.Count; j++)
+                    for (int i = 0; i < listBox1.Items.Count; i++)
                     {
-                        if (Convert.ToDouble(listBox1.Items[i]) > Convert.ToDouble(listBox1.Items[j]))
+                        for (int j = i + 1; j < listBox1.Items.Count; j++)
                         {
-                            temp = Convert.ToDouble(listBox1.Items[i]);
-                            listBox1.Items[i] = Convert.ToDouble(listBox1.Items[j]);
-                            listBox1.Items[j] = temp;
+                            if (Convert.ToDouble(listBox1.Items[i]) > Convert.ToDouble(listBox1.Items[j]))
+                            {
+                                temp = Convert.ToDouble(listBox1.Items[i]);
+                                listBox1.Items[i] = Convert.ToDouble(listBox1.Items[j]);
+                                listBox1.Items[j] = temp;
+                            }
                         }
                     }
                 }
             }
-
+            catch (Exception e11)
+            {
+                MessageBox.Show("Ошибка в перемещении элементов. Проверьте, что вы выделили точку.");
+            }
         }
 
         private void button5_Click(object sender, EventArgs e)

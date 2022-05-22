@@ -16,7 +16,6 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
-
         private SQLiteConnection SQLiteConn;
 
         public SQLiteConnection SQLiteConnectionConn { get; private set; }
@@ -33,7 +32,6 @@ namespace WindowsFormsApp1
         double m_minus_max = 0;
         double decomp4_min = 999999;
         double decomp4_max = -1;
-
         public Form1()
         {
             InitializeComponent();
@@ -50,16 +48,7 @@ namespace WindowsFormsApp1
             SQLiteConnectionConn = new SQLiteConnection();
             dTable = new DataTable();
             par_dtable = new DataTable();
-            tabPage2.Parent = null;
-            tabPage3.Parent = null;
-            tabPage5.Parent = null;
-            tabPage7.Parent = null;
-            button1.Enabled = false;
-            button3.Enabled = false;
-            button4.Enabled = false;
-            this.comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-
-
+    
         }
 
         public Image ByteToImage(byte[] imageBytes)
@@ -131,54 +120,55 @@ namespace WindowsFormsApp1
 
             if (OpenDBFile() == true)
             {
-                string query = "SELECT data FROM `images` WHERE `id`= 1";
-                SQLiteCommand cmd = new SQLiteCommand(query, SQLiteConn);
+                try {
+                    string query = "SELECT data FROM `images` WHERE `id`= 1";
+                    SQLiteCommand cmd = new SQLiteCommand(query, SQLiteConn);
 
-                SQLiteDataReader rdr = cmd.ExecuteReader();
-                while (rdr.Read())
-                {
-                    byte[] a = (System.Byte[])rdr[0];
-                    pictureBox1.Image = ByteToImage(a);
-                }
-                pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-                pictureBox1.Image = new Bitmap(pictureBox1.Image);
-
-                statusStrip1.Items.Add(ELabel);
-                statusStrip1.Items.Add(ALabel);
-
-                string pars = "SELECT * FROM `parameters`";
-                SQLiteCommand command = new SQLiteCommand(pars, SQLiteConn);
-                command.CommandText = "SELECT * FROM `parameters`";
-                DataTable data = new DataTable();
-                SQLiteDataAdapter adapter = new SQLiteDataAdapter(command);
-                adapter.Fill(data);
-                Console.WriteLine($"Прочитано {data.Rows.Count} записей из таблицы БД");
-                foreach (DataRow row in data.Rows)
-                {
-                    Console.WriteLine($"id = {row.Field<long>("id")} name = {row.Field<string>("name")} value = {row.Field<double>("value")}");
-                    if (row.Field<long>("id") == 1)
+                    SQLiteDataReader rdr = cmd.ExecuteReader();
+                    while (rdr.Read())
                     {
-                        textBox1.Text = row.Field<double>("value").ToString();
-                        ELabel.Text = textBox1.Text + " , ";
-                        par_E = row.Field<double>("value");
+                        byte[] a = (System.Byte[])rdr[0];
+                        pictureBox1.Image = ByteToImage(a);
                     }
+                    pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+                    pictureBox1.Image = new Bitmap(pictureBox1.Image);
 
-                    if (row.Field<long>("id") == 2)
+                    statusStrip1.Items.Add(ELabel);
+                    statusStrip1.Items.Add(ALabel);
+
+                    string pars = "SELECT * FROM `parameters`";
+                    SQLiteCommand command = new SQLiteCommand(pars, SQLiteConn);
+                    command.CommandText = "SELECT * FROM `parameters`";
+                    DataTable data = new DataTable();
+                    SQLiteDataAdapter adapter = new SQLiteDataAdapter(command);
+                    adapter.Fill(data);
+                    Console.WriteLine($"Прочитано {data.Rows.Count} записей из таблицы БД");
+                    foreach (DataRow row in data.Rows)
                     {
-                        textBox2.Text = row.Field<double>("value").ToString();
-                        ALabel.Text = textBox2.Text;
-                        par_A = row.Field<double>("value");
-                    }
-                    ShowTable(SQL_ALLTable());
-                }
+                        Console.WriteLine($"id = {row.Field<long>("id")} name = {row.Field<string>("name")} value = {row.Field<double>("value")}");
+                        if (row.Field<long>("id") == 1)
+                        {
+                            textBox1.Text = row.Field<double>("value").ToString();
+                            ELabel.Text = textBox1.Text + " , ";
+                            par_E = row.Field<double>("value");
+                        }
 
-                tabPage2.Parent = tabControl1;
-                tabPage3.Parent = tabControl1;
-                tabPage5.Parent = tabControl1;
-                button1.Enabled = true;
-                button3.Enabled = true;
-                button4.Enabled = true;
+                        if (row.Field<long>("id") == 2)
+                        {
+                            textBox2.Text = row.Field<double>("value").ToString();
+                            ALabel.Text = textBox2.Text;
+                            par_A = row.Field<double>("value");
+                        }
+                        ShowTable(SQL_ALLTable());
+                    }
+                }
+                catch (Exception except)
+                {
+                    MessageBox.Show("Ошибка при подключении к базе. \n\n\n" + Convert.ToString(except));
+                }
             }
+            
+            
         }
 
         private void button3_Click(object sender, EventArgs e) // Удаление
@@ -220,6 +210,7 @@ namespace WindowsFormsApp1
             }
 
             sql_query = sql_query.Remove(sql_query.Length - 1) + ")";
+
             Console.WriteLine(sql_query);
 
             SQLiteCommand cmd = new SQLiteCommand(sql_query, SQLiteConn);
@@ -636,18 +627,41 @@ namespace WindowsFormsApp1
 
 
         }
-
+        //Стринга, чтобы парсить предыдущие точки, которые выбрали в другом блоке
+        string last_points_str = "";
         private void button6_Click(object sender, EventArgs e)
         {
             comboBox1.SelectedIndex = -1;
             comboBox1.Items.Clear();
-            string[] name_blocks = { "Блок A", "Блок B", "Блок C", "Блок D", "Блок E", "Блок F" };
-            double kol = Convert.ToDouble(textBox3.Text);
-            for (int i = 0; i < kol; i++)
+            double kol;
+            string[] name_blocks = { "Блок A", "Блок B", "Блок C", "Блок D", "Блок E", "Блок F", "Блок G", "Блок H", "Блок K", "Блок L" };
+            try
             {
-                comboBox1.Items.Add(name_blocks[i]);
+                kol = Convert.ToDouble(textBox3.Text);
+                
+                if (kol <= name_blocks.Length)
+                {
+                    last_points_str = "";
+                    for (int i = 0; i < kol; i++)
+                    {
+                        comboBox1.Items.Add(name_blocks[i]);
+                      
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Поддерживаемое количество блоков - {0}. Пожалуйста, введите число не превышающее максимума ", name_blocks.Length);
+                    MessageBox.Show("Поддерживаемое количество блоков - " + Convert.ToString(name_blocks.Length) + ". Пожалуйста, введите число не превышающее максимума");
+                }
             }
-            /*            double kol_dotCount = dataGridView1.Columns.Count-1;
+            catch (Exception exep)
+            {
+                Console.WriteLine("На ввод принимаются только числа.");
+                MessageBox.Show("На ввод принимаются только числа.");
+            }
+           
+           
+            /*          double kol_dotCount = dataGridView1.Columns.Count-1;
                         double kol_dotblockCount = Math.Truncate(kol_dotCount/kol);
                         Console.WriteLine(kol_dotCount);
                         Console.WriteLine(kol_dotblockCount);*/
@@ -670,14 +684,58 @@ namespace WindowsFormsApp1
                     metka = comboBox1.SelectedIndex * kol_dotblockCount + i;
                     listBox1.Items.Add(metka);
                 }
+
+                string[] blocks_n_points = last_points_str.Split(',');
+                int elem_count = 0;
+                foreach (char c in last_points_str)
+                    if (c == ',') elem_count++;
+                //Теряем одну точку из-за того, что последний символ != ,
+                elem_count += 1;
+                Console.WriteLine($"elem_count = {elem_count}");
+                if (blocks_n_points[0] != "")
+                {
+                    for (int i = 0; i < elem_count; i++)
+                    {
+                        if (blocks_n_points[i].Split('-')[0] == Convert.ToString(comboBox1.SelectedItem).Split(' ')[1])
+                        {
+                            listBox1.Items.Remove(Convert.ToDouble(blocks_n_points[i].Split('-')[1]));
+                            listBox2.Items.Add(Convert.ToDouble(blocks_n_points[i].Split('-')[1]));
+
+                        }
+                    }
+                }
+                sort_listbox2();
             }
         }
 
         private void button7_Click(object sender, EventArgs e)
         {
+            //Console.WriteLine(last_points_str.Split(','));
+            
+
+
+            //Получаем в формате "Блок A"
+            string cur_block = Convert.ToString(comboBox1.SelectedItem);
+            
+            
+                listBox2.Items.Add(listBox1.SelectedItem);
+                if (last_points_str != "")
+                    last_points_str += ",";
+                last_points_str += cur_block.Split(' ')[1] + "-" + listBox1.SelectedItem;
+                Console.WriteLine($"last_points_str - '{last_points_str}'");
+
+
+                listBox1.Items.Remove(listBox1.SelectedItem);
+                sort_listbox2();
+
+
+
+
+        }
+
+        private void sort_listbox2()
+        {
             double temp = 0;
-            listBox2.Items.Add(listBox1.SelectedItem);
-            listBox1.Items.Remove(listBox1.SelectedItem);
             if (listBox2.Items.Count > 1)
             {
                 for (int i = 0; i < listBox2.Items.Count; i++)
@@ -689,11 +747,14 @@ namespace WindowsFormsApp1
                             temp = Convert.ToDouble(listBox2.Items[i]);
                             listBox2.Items[i] = Convert.ToDouble(listBox2.Items[j]);
                             listBox2.Items[j] = temp;
+
+
                         }
                     }
                 }
-            }
 
+
+            }
         }
 
         private void button8_Click(object sender, EventArgs e)
@@ -744,11 +805,6 @@ namespace WindowsFormsApp1
 
                 }
             }
-            if (listBox2.Items.Count != 0)
-            {
-                tabPage7.Parent = tabControl2;
-            }
-
         }
 
         private void tabControl2_MouseClick(object sender, MouseEventArgs e)
@@ -1020,6 +1076,16 @@ namespace WindowsFormsApp1
                     }
                 }
             }
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

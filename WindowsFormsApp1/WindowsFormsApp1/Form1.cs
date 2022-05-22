@@ -48,7 +48,15 @@ namespace WindowsFormsApp1
             SQLiteConnectionConn = new SQLiteConnection();
             dTable = new DataTable();
             par_dtable = new DataTable();
-    
+            tabPage2.Parent = null;
+            tabPage3.Parent = null;
+            tabPage5.Parent = null;
+            tabPage7.Parent = null;
+            button1.Enabled = false;
+            button3.Enabled = false;
+            button4.Enabled = false;
+            this.comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
+
         }
 
         public Image ByteToImage(byte[] imageBytes)
@@ -160,6 +168,12 @@ namespace WindowsFormsApp1
                             par_A = row.Field<double>("value");
                         }
                         ShowTable(SQL_ALLTable());
+                        tabPage2.Parent = tabControl1;
+                        tabPage3.Parent = tabControl1;
+                        tabPage5.Parent = tabControl1;
+                        button1.Enabled = true;
+                        button3.Enabled = true;
+                        button4.Enabled = true;
                     }
                 }
                 catch (Exception except)
@@ -804,6 +818,10 @@ namespace WindowsFormsApp1
                     dataGridView3.Rows[j].Cells[i + 1].Value = Convert.ToDouble(dataGridView1.Rows[j].Cells[Convert.ToInt32(listBox2.Items[i])].Value);
 
                 }
+            }
+            if (listBox2.Items.Count != 0)
+            {
+                tabPage7.Parent = tabControl2;
             }
         }
 

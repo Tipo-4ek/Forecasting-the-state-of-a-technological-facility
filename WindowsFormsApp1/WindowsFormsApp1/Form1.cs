@@ -597,7 +597,7 @@ namespace WindowsFormsApp1
             {
                 if (checkedListBox3.GetItemChecked(x))
                 {
-                    CreateSerie(0, x, Convert.ToString(x), chart6, true, 1, alpha_minus_min, alpha_plus_max, dataGridView1);
+                    CreateSerie(0, x, Convert.ToString(x+1), chart6, true, 1, alpha_minus_min, alpha_plus_max, dataGridView1);
                 }
             }
         }

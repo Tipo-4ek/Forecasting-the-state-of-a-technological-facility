@@ -16,6 +16,7 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
+
         private SQLiteConnection SQLiteConn;
 
         public SQLiteConnection SQLiteConnectionConn { get; private set; }
@@ -32,6 +33,7 @@ namespace WindowsFormsApp1
         double m_minus_max = 0;
         double decomp4_min = 999999;
         double decomp4_max = -1;
+
         public Form1()
         {
             InitializeComponent();
@@ -48,7 +50,16 @@ namespace WindowsFormsApp1
             SQLiteConnectionConn = new SQLiteConnection();
             dTable = new DataTable();
             par_dtable = new DataTable();
-    
+            tabPage2.Parent = null;
+            tabPage3.Parent = null;
+            tabPage5.Parent = null;
+            tabPage7.Parent = null;
+            button1.Enabled = false;
+            button3.Enabled = false;
+            button4.Enabled = false;
+            this.comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
+
+
         }
 
         public Image ByteToImage(byte[] imageBytes)
@@ -160,6 +171,13 @@ namespace WindowsFormsApp1
                     }
                     ShowTable(SQL_ALLTable());
                 }
+
+                tabPage2.Parent = tabControl1;
+                tabPage3.Parent = tabControl1;
+                tabPage5.Parent = tabControl1;
+                button1.Enabled = true;
+                button3.Enabled = true;
+                button4.Enabled = true;
             }
         }
 
@@ -726,6 +744,11 @@ namespace WindowsFormsApp1
 
                 }
             }
+            if (listBox2.Items.Count != 0)
+            {
+                tabPage7.Parent = tabControl2;
+            }
+
         }
 
         private void tabControl2_MouseClick(object sender, MouseEventArgs e)

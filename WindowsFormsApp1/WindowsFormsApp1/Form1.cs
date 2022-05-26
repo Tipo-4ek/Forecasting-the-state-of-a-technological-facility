@@ -44,6 +44,8 @@ namespace WindowsFormsApp1
         }
         private void Form1_Load(object sender, EventArgs e)
         {
+            this.WindowState = FormWindowState.Maximized;
+
             this.Cursor = Cursors.Default;
             SQLiteConnectionConn = new SQLiteConnection();
             dTable = new DataTable();
@@ -56,6 +58,8 @@ namespace WindowsFormsApp1
             button3.Enabled = false;
             button4.Enabled = false;
             this.comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
+            ToolTip t = new ToolTip();
+            t.SetToolTip(button9, "--__--");
 
         }
 
@@ -129,7 +133,7 @@ namespace WindowsFormsApp1
             if (OpenDBFile() == true)
             {
                 try {
-                    string query = "SELECT data FROM `images` WHERE `id`= 1";
+                    string query = "SELECT data FROM `images` WHERE `id`= 2";
                     SQLiteCommand cmd = new SQLiteCommand(query, SQLiteConn);
 
                     SQLiteDataReader rdr = cmd.ExecuteReader();
@@ -642,7 +646,7 @@ namespace WindowsFormsApp1
         }
         private void Decomposition2()
         {
-            string query = "SELECT data FROM `images` WHERE `id`= 1";
+            string query = "SELECT data FROM `images` WHERE `id`= 2";
             SQLiteCommand cmd = new SQLiteCommand(query, SQLiteConn);
 
             SQLiteDataReader rdr = cmd.ExecuteReader();
@@ -659,11 +663,16 @@ namespace WindowsFormsApp1
         }
         //Стринга, чтобы парсить предыдущие точки, которые выбрали в другом блоке
         string last_points_str = "";
+
+
+
+
         private void button6_Click(object sender, EventArgs e)
         {
             comboBox1.SelectedIndex = -1;
             comboBox1.Items.Clear();
             double kol;
+            
             string[] name_blocks = { "Блок A", "Блок B", "Блок C", "Блок D", "Блок E", "Блок F", "Блок G", "Блок H", "Блок K", "Блок L" };
             try
             {
@@ -689,8 +698,8 @@ namespace WindowsFormsApp1
                 Console.WriteLine("На ввод принимаются только числа.");
                 MessageBox.Show("На ввод принимаются только числа.");
             }
-           
-           
+
+
             /*          double kol_dotCount = dataGridView1.Columns.Count-1;
                         double kol_dotblockCount = Math.Truncate(kol_dotCount/kol);
                         Console.WriteLine(kol_dotCount);
@@ -761,7 +770,7 @@ namespace WindowsFormsApp1
             }
             catch (Exception e11)
             {
-                MessageBox.Show("Ошибка в перемещении элементов. Проверьте, что вы выделили точку.");
+                MessageBox.Show("Ошибка в перемещении элементов. Проверьте, что вы выбрали метку.");
             }
 
 
@@ -817,7 +826,7 @@ namespace WindowsFormsApp1
             }
             catch (Exception e11)
             {
-                MessageBox.Show("Ошибка в перемещении элементов. Проверьте, что вы выделили точку.");
+                MessageBox.Show("Ошибка в перемещении элементов. Проверьте, что вы выбрали метку.");
             }
         }
 
@@ -1129,6 +1138,11 @@ namespace WindowsFormsApp1
         }
 
         private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkedListBox3_ItemCheck(object sender, ItemCheckEventArgs e)
         {
 
         }

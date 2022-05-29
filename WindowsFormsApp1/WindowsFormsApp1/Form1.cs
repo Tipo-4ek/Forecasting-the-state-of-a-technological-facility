@@ -1000,31 +1000,38 @@ namespace WindowsFormsApp1
 
         private void button5_Click(object sender, EventArgs e)
         {
-            dataGridView3.Columns.Clear();
-            dataGridView3.Rows.Clear();
-            dataGridView3.Columns.Add("Эпоха", "Эпоха");
-            dataGridView3.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-            for (int i = 1; i <= listBox2.Items.Count; i++)
+            if (listBox2.Items.Count > 1)
             {
-                dataGridView3.Columns.Add(Convert.ToString(listBox2.Items[i - 1]), Convert.ToString(listBox2.Items[i - 1]));
-                dataGridView3.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-            }
-            for (int i = 0; i < dataGridView1.Rows.Count - 1; i++)
-            {
-                dataGridView3.Rows.Add(dataGridView1.Rows[i].Cells[0].Value); ;
-            }
-
-            for (int i = 0; i < listBox2.Items.Count; i++)
-            {
-                for (int j = 0; j < dataGridView1.Rows.Count - 1; j++)
+                tabPage7.Parent = tabControl2;
+                dataGridView3.Columns.Clear();
+                dataGridView3.Rows.Clear();
+                dataGridView3.Columns.Add("Эпоха", "Эпоха");
+                dataGridView3.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                for (int i = 1; i <= listBox2.Items.Count; i++)
                 {
-                    Console.WriteLine(listBox2.Items[i]);
-                    dataGridView3.Rows[j].Cells[i + 1].Value = Convert.ToDouble(dataGridView1.Rows[j].Cells[Convert.ToInt32(listBox2.Items[i])].Value);
+                    dataGridView3.Columns.Add(Convert.ToString(listBox2.Items[i - 1]), Convert.ToString(listBox2.Items[i - 1]));
+                    dataGridView3.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                }
+                for (int i = 0; i < dataGridView1.Rows.Count - 1; i++)
+                {
+                    dataGridView3.Rows.Add(dataGridView1.Rows[i].Cells[0].Value); ;
+                }
 
+                for (int i = 0; i < listBox2.Items.Count; i++)
+                {
+                    for (int j = 0; j < dataGridView1.Rows.Count - 1; j++)
+                    {
+                        Console.WriteLine(listBox2.Items[i]);
+                        dataGridView3.Rows[j].Cells[i + 1].Value = Convert.ToDouble(dataGridView1.Rows[j].Cells[Convert.ToInt32(listBox2.Items[i])].Value);
+
+                    }
                 }
             }
-            if (listBox2.Items.Count != 0)
-                tabPage7.Parent = tabControl2;
+            else
+            {
+                MessageBox.Show("Выберите не менее двух точек для построения графиков");
+                tabPage7.Parent = null;
+            }
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)

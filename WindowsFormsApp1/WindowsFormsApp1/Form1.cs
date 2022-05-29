@@ -628,6 +628,8 @@ namespace WindowsFormsApp1
             {
                 if (alpha_minus_min != alpha_plus_max)
                     charts_init(chart1, alpha_minus_min, alpha_plus_max);
+                else
+                    charts_init(chart1, -0.00001, 0.00001);
                 if (m_minus_min != m_plus_max)
                     charts_init(chart2, m_minus_min, m_plus_max);
             }

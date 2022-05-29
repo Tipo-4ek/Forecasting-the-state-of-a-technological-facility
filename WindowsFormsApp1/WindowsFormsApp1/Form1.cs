@@ -11,7 +11,6 @@ using System.Data.SQLite;
 using System.IO;
 using System.Windows.Forms.DataVisualization.Charting;
 
-
 namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
@@ -22,35 +21,44 @@ namespace WindowsFormsApp1
 
         private DataTable dTable;
         private DataTable par_dtable;
-        ToolStripLabel ALabel;
-        ToolStripLabel ELabel;
-        double par_E = -1;
-        double par_A = -1;
+        ToolStripLabel __ss_Alabel__;
+        ToolStripLabel __ss_Elabel__;
+        double parameter_E = -1;
+        double __parameter_A__ = -1;
         double alpha_plus_max = 0;
-        double alpha_minus_min = 0;
-        double m_minus_min = 0;
+        double __alpha_minus_low__ = 0;
+        double __m_minus_low__ = 0;
         
-        double m_plus_max = 0;
+        double __m_plus_high__ = 0;
         double decomp4_min = 999999;
         double decomp4_max = -1;
         double alpha_plus_max_dec2 = 0;
-        double alpha_minus_min_dec2 = 999999;
-        double m_minus_min_dec2 = 999999;
-        double m_plus_max_dec2 = 0;
+        double __alpha_minus_low___dec2 = 999999;
+        double __m_minus_low___dec2 = 999999;
+        double __m_plus_high___dec2 = 0;
+
         public Form1()
         {
             InitializeComponent();
-            ELabel = new ToolStripLabel();
-            ALabel = new ToolStripLabel();
-            
-
-
+            __ss_Elabel__ = new ToolStripLabel();
+            __ss_Alabel__ = new ToolStripLabel();
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
+            dataGridView1.DefaultCellStyle.ForeColor = Color.White;
+            dataGridView1.DefaultCellStyle.BackColor = Color.DimGray;
+            dataGridView2.DefaultCellStyle.ForeColor = Color.White;
+            dataGridView2.DefaultCellStyle.BackColor = Color.DimGray;
+            dataGridView3.DefaultCellStyle.ForeColor = Color.White;
+            dataGridView3.DefaultCellStyle.BackColor = Color.DimGray;
+            dataGridView4.DefaultCellStyle.ForeColor = Color.White;
+            dataGridView4.DefaultCellStyle.BackColor = Color.DimGray;
+            label9.Text = "Перед нажатием на кнопку удостоверьтесь,\nчто на блоках выбрано одинаковое количество точек.";
 
         }
         private void Form1_Load(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Maximized;
-
+            
             this.Cursor = Cursors.Default;
             SQLiteConnectionConn = new SQLiteConnection();
             dTable = new DataTable();
@@ -144,8 +152,8 @@ namespace WindowsFormsApp1
                     pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
                     pictureBox1.Image = new Bitmap(pictureBox1.Image);
 
-                    statusStrip1.Items.Add(ELabel);
-                    statusStrip1.Items.Add(ALabel);
+                    statusStrip1.Items.Add(__ss_Elabel__);
+                    statusStrip1.Items.Add(__ss_Alabel__);
 
                     string pars = "SELECT * FROM `parameters`";
                     SQLiteCommand command = new SQLiteCommand(pars, SQLiteConn);
@@ -160,15 +168,15 @@ namespace WindowsFormsApp1
                         if (row.Field<long>("id") == 1)
                         {
                             textBox1.Text = row.Field<double>("value").ToString();
-                            ELabel.Text = textBox1.Text + " , ";
-                            par_E = row.Field<double>("value");
+                            __ss_Elabel__.Text = textBox1.Text + " , ";
+                            parameter_E = row.Field<double>("value");
                         }
 
                         if (row.Field<long>("id") == 2)
                         {
                             textBox2.Text = row.Field<double>("value").ToString();
-                            ALabel.Text = textBox2.Text;
-                            par_A = row.Field<double>("value");
+                            __ss_Alabel__.Text = textBox2.Text;
+                            __parameter_A__ = row.Field<double>("value");
                         }
 
                     }
@@ -249,7 +257,7 @@ namespace WindowsFormsApp1
             inp_chart.ChartAreas[0].AxisY.Maximum = y_max;
         }
 
-        public void CreateSerie(int cells_x, int cells_y, string inp_nameSerie, Chart inp_chartName, bool isNeedXCut, long koeff_umnozhenia, double y_min, double y_max, DataGridView inp_datagrid)
+        public void CreateSerie(int cells_x, int cells_y, string inp_nameSerie, Chart inp_chartName, DataGridView inp_datagrid)
         {
             try
             {
@@ -282,18 +290,23 @@ namespace WindowsFormsApp1
                     inp_chartName.ChartAreas[0].AxisX.Title = "t";
                     inp_chartName.ChartAreas[0].AxisY.Title = "H";
                 }
+                if (inp_chartName == chart5)
+                {
+                    inp_chartName.ChartAreas[0].AxisX.Title = "M";
+                    inp_chartName.ChartAreas[0].AxisY.Title = "t";
+                }
 
                 for (int p = 0; p < inp_datagrid.Rows.Count - 2; p++)
                 {
 
 
                     x = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_x].Value);
-                    if (isNeedXCut)
-                        x = x - x % 0.0001;
-                    y = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_y].Value) * koeff_umnozhenia;
+                    
+                    y = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_y].Value);
 
                     //Console.WriteLine("\n" + inp_nameSerie + " - " + x + " | " + y);
                     inp_chartName.Series[Serie1].Points.AddXY(x, y);
+                    inp_chartName.Series[Serie1].Points[p].LabelBackColor = Color.White;
                     inp_chartName.Series[Serie1].Points[p].Label = Convert.ToString(p);
 
 
@@ -307,21 +320,22 @@ namespace WindowsFormsApp1
             catch (Exception exxx)
             {
                 MessageBox.Show($"Ошибка в построение графика {inp_nameSerie}");
+                Console.WriteLine(exxx);
             }
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            ELabel.Text = textBox1.Text + " , ";
-            ALabel.Text = textBox2.Text;
+            __ss_Elabel__.Text = textBox1.Text + " , ";
+            __ss_Alabel__.Text = textBox2.Text;
             try
             {
-                par_E = Convert.ToDouble(textBox1.Text);
-                if (par_E < 0)
+                parameter_E = Convert.ToDouble(textBox1.Text);
+                if (parameter_E < 0)
                 {
-                    ELabel.Text = "0 , ";
+                    __ss_Elabel__.Text = "0 , ";
                     MessageBox.Show("E должно быть больше 0!");
-                    par_E = 0;
+                    parameter_E = 0;
 
                     textBox1.Text = "0";
                 }
@@ -329,15 +343,16 @@ namespace WindowsFormsApp1
             catch (Exception e1)
             {
                 MessageBox.Show("Ошибка в параметре E. На вход принимаются только числа\nДействие не выполнено.");
+                Console.WriteLine(e1);
             }
             try
             {
-                par_A = Convert.ToDouble(textBox2.Text);
-                if (par_A  < 0 || par_A > 1)
+                __parameter_A__ = Convert.ToDouble(textBox2.Text);
+                if (__parameter_A__  < 0 || __parameter_A__ > 1)
                 {
-                    ALabel.Text = "0";
+                    __ss_Alabel__.Text = "0";
                     MessageBox.Show("A должно быть больше 0 и меньше 1!");
-                    par_A = 0;
+                    __parameter_A__ = 0;
 
                     textBox2.Text = "0";
                 }
@@ -345,6 +360,7 @@ namespace WindowsFormsApp1
             catch (Exception e2)
             {
                 MessageBox.Show("Ошибка в параметре A. На вход принимаются только числа.\nДействие не выполнено.");
+                Console.WriteLine(e2);
             }
 
            
@@ -368,9 +384,9 @@ namespace WindowsFormsApp1
         {
            
             alpha_plus_max = 0;
-            alpha_minus_min = 999999;
-            m_minus_min = 999999;
-            m_plus_max = 0;
+            __alpha_minus_low__ = 999999;
+            __m_minus_low__ = 999999;
+            __m_plus_high__ = 0;
       
 
             string[] name = { "Эпоха", "M", "alfa", "M+", "M-", "alfa+", "alfa-", "M(прогн)", "alfa(прогн)", "M+(прогн)", "M-(прогн)", "alfa+(прогн)", "alfa-(прогн)", "L", "R", "Устойчивость" };
@@ -398,13 +414,13 @@ namespace WindowsFormsApp1
                 for (int j = 1; j < dataGridView1.Columns.Count; j++)
                 {
                     M += Math.Pow(Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value), 2);
-                    M_plus += Math.Pow(Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) + par_E, 2);
-                    M_minus += Math.Pow(Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) - par_E, 2);
+                    M_plus += Math.Pow(Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) + parameter_E, 2);
+                    M_minus += Math.Pow(Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) - parameter_E, 2);
 
                     alfa += Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) * Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value);
-                    alfa_plus += (Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) + par_E) * (Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) + par_E);
-                    //Console.WriteLine(Convert.ToString(Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) + par_E));
-                    alfa_minus += (Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) - par_E) * (Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) - par_E);
+                    alfa_plus += (Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) + parameter_E) * (Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) + parameter_E);
+                    //Console.WriteLine(Convert.ToString(Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) + parameter_E));
+                    alfa_minus += (Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) - parameter_E) * (Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) - parameter_E);
 
                     /*                        Console.WriteLine(Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value));
                                             Console.WriteLine(Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value));*/
@@ -425,8 +441,9 @@ namespace WindowsFormsApp1
                 {
                     //Console.WriteLine("М первая {0}", Math.Sqrt(M_prev));
                     //Console.WriteLine("М {0}", Math.Sqrt(M));
-
+                    Console.WriteLine("alfa ({0}) / ниже", alfa);
                     alfa = alfa / (Math.Sqrt(M_prev) * Math.Sqrt(M));
+                    Console.WriteLine("/ ({0} * {1}) = {2}", Math.Sqrt(M_prev), Math.Sqrt(M), alfa);
                     /* Console.WriteLine("alpa_plus = {0}", alfa_plus);*/
                     alfa_plus = alfa_plus / (Math.Sqrt(M_prev_plus) * Math.Sqrt(M_plus));
                     /*double temp = (Math.Sqrt(M_prev_plus) * Math.Sqrt(M_plus));
@@ -444,7 +461,12 @@ namespace WindowsFormsApp1
                 M = Math.Round(M,4);
                 M_plus = Math.Round(M_plus, 4);
                 M_minus = Math.Round(M_minus, 4);
-               
+                if (Convert.ToString(comboBox2.SelectedItem) == "Покой")
+                {
+                    alfa = 0;
+                    alfa_minus = 0;
+                    alfa_plus = 0;
+                }
                 dataGridView2.Rows[i].Cells[1].Value = Math.Round(Math.Sqrt(M),4);
                 dataGridView2.Rows[i].Cells[3].Value = Math.Round(Math.Sqrt(M_plus), 4);
                 dataGridView2.Rows[i].Cells[4].Value = Math.Round(Math.Sqrt(M_minus), 4);
@@ -460,17 +482,17 @@ namespace WindowsFormsApp1
 
                 /// y_min
                 
-                if (alfa_minus < alpha_minus_min)
-                    alpha_minus_min = alfa_minus;              
-                if (Math.Sqrt(M_minus) < m_minus_min)
-                    m_minus_min = Math.Sqrt(M_minus);
+                if (alfa_minus < __alpha_minus_low__)
+                    __alpha_minus_low__ = alfa_minus;              
+                if (Math.Sqrt(M_minus) < __m_minus_low__)
+                    __m_minus_low__ = Math.Sqrt(M_minus);
               
                 ///y_max
                 
                 if (alfa_plus > alpha_plus_max)
                     alpha_plus_max = alfa_plus;
-                if (Math.Sqrt(M_plus) > m_plus_max)
-                    m_plus_max = Math.Sqrt(M_plus);
+                if (Math.Sqrt(M_plus) > __m_plus_high__)
+                    __m_plus_high__ = Math.Sqrt(M_plus);
 
                 M = 0;
                 M_plus = 0;
@@ -484,9 +506,9 @@ namespace WindowsFormsApp1
             {
                 if (i == 0)
                 {
-                    M_progn = par_A * Convert.ToDouble(dataGridView2.Rows[0].Cells[1].Value) + (1 - par_A) * (sum_M / (dataGridView2.Rows.Count - 2));
-                    M_plus_progn = par_A * Convert.ToDouble(dataGridView2.Rows[0].Cells[3].Value) + (1 - par_A) * (sum_M_plus / (dataGridView2.Rows.Count - 2));
-                    M_minus_progn = par_A * Convert.ToDouble(dataGridView2.Rows[0].Cells[4].Value) + (1 - par_A) * (sum_M_minus / (dataGridView2.Rows.Count - 2));
+                    M_progn = __parameter_A__ * Convert.ToDouble(dataGridView2.Rows[0].Cells[1].Value) + (1 - __parameter_A__) * (sum_M / (dataGridView2.Rows.Count - 2));
+                    M_plus_progn = __parameter_A__ * Convert.ToDouble(dataGridView2.Rows[0].Cells[3].Value) + (1 - __parameter_A__) * (sum_M_plus / (dataGridView2.Rows.Count - 2));
+                    M_minus_progn = __parameter_A__ * Convert.ToDouble(dataGridView2.Rows[0].Cells[4].Value) + (1 - __parameter_A__) * (sum_M_minus / (dataGridView2.Rows.Count - 2));
                     dataGridView2.Rows[i].Cells[7].Value = M_progn;
                     dataGridView2.Rows[i].Cells[8].Value = 0;
                     dataGridView2.Rows[i].Cells[9].Value = M_plus_progn;
@@ -513,12 +535,12 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    M_progn = par_A * Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value) + (1 - par_A) * M_progn_prev;
-                    alfa_progn = par_A * Convert.ToDouble(dataGridView2.Rows[i].Cells[2].Value) + (1 - par_A) * alfa_progn_prev;
-                    M_plus_progn = par_A * Convert.ToDouble(dataGridView2.Rows[i].Cells[3].Value) + (1 - par_A) * M_progn_prev_plus;
-                    M_minus_progn = par_A * Convert.ToDouble(dataGridView2.Rows[i].Cells[4].Value) + (1 - par_A) * M_progn_prev_minus;
-                    alfa_plus_progn = par_A * Convert.ToDouble(dataGridView2.Rows[i].Cells[5].Value) + (1 - par_A) * alfa_progn_prev_plus;
-                    alfa_minus_progn = par_A * Convert.ToDouble(dataGridView2.Rows[i].Cells[6].Value) + (1 - par_A) * alfa_progn_prev_minus;
+                    M_progn = __parameter_A__ * Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value) + (1 - __parameter_A__) * M_progn_prev;
+                    alfa_progn = __parameter_A__ * Convert.ToDouble(dataGridView2.Rows[i].Cells[2].Value) + (1 - __parameter_A__) * alfa_progn_prev;
+                    M_plus_progn = __parameter_A__ * Convert.ToDouble(dataGridView2.Rows[i].Cells[3].Value) + (1 - __parameter_A__) * M_progn_prev_plus;
+                    M_minus_progn = __parameter_A__ * Convert.ToDouble(dataGridView2.Rows[i].Cells[4].Value) + (1 - __parameter_A__) * M_progn_prev_minus;
+                    alfa_plus_progn = __parameter_A__ * Convert.ToDouble(dataGridView2.Rows[i].Cells[5].Value) + (1 - __parameter_A__) * alfa_progn_prev_plus;
+                    alfa_minus_progn = __parameter_A__ * Convert.ToDouble(dataGridView2.Rows[i].Cells[6].Value) + (1 - __parameter_A__) * alfa_progn_prev_minus;
                     dataGridView2.Rows[i].Cells[7].Value = M_progn;
                     dataGridView2.Rows[i].Cells[8].Value = alfa_progn;
                     dataGridView2.Rows[i].Cells[9].Value = M_plus_progn;
@@ -577,14 +599,14 @@ namespace WindowsFormsApp1
 
             }
 
-            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[7].Value = par_A * (sum_M_progn / (dataGridView2.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[7].Value);
+            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[7].Value = __parameter_A__ * (sum_M_progn / (dataGridView2.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[7].Value);
             Console.WriteLine("Среднее знач M прогн {0}", sum_M_progn / (dataGridView2.Rows.Count - 2));
             Console.WriteLine("Последнее значение {0}", Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[7].Value));
-            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[8].Value = par_A * (sum_alfa_progn / (dataGridView2.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[8].Value);
-            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[9].Value = par_A * (sum_Mplus_progn / (dataGridView2.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[9].Value);
-            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[10].Value = par_A * (sum_Mminus_progn / (dataGridView2.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[10].Value);
-            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[11].Value = par_A * (sum_alfaplus_progn / (dataGridView2.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[11].Value);
-            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[12].Value = par_A * (sum_alfaminus_progn / (dataGridView2.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[12].Value);
+            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[8].Value = __parameter_A__ * (sum_alfa_progn / (dataGridView2.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[8].Value);
+            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[9].Value = __parameter_A__ * (sum_Mplus_progn / (dataGridView2.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[9].Value);
+            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[10].Value = __parameter_A__ * (sum_Mminus_progn / (dataGridView2.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[10].Value);
+            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[11].Value = __parameter_A__ * (sum_alfaplus_progn / (dataGridView2.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[11].Value);
+            dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[12].Value = __parameter_A__ * (sum_alfaminus_progn / (dataGridView2.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[12].Value);
             L = Math.Abs(Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count-2].Cells[9].Value) - Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[10].Value));
             R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[7].Value) - M_null) / 2);
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[13].Value = L;
@@ -621,42 +643,43 @@ namespace WindowsFormsApp1
             Decomposition2();
             }
 
-
-        private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
+        public void listbox1_update_indexes()
         {
             try
             {
-                if (alpha_minus_min != alpha_plus_max)
-                    charts_init(chart1, alpha_minus_min, alpha_plus_max);
+                if (__alpha_minus_low__ != alpha_plus_max)
+                    charts_init(chart1, __alpha_minus_low__, alpha_plus_max);
                 else
                     charts_init(chart1, -0.00001, 0.00001);
-                if (m_minus_min != m_plus_max)
-                    charts_init(chart2, m_minus_min, m_plus_max);
+                if (__m_minus_low__ != __m_plus_high__)
+                    charts_init(chart2, __m_minus_low__, __m_plus_high__);
             }
             catch (Exception ei)
             {
                 MessageBox.Show("К сожалению, мы не смогли посчитать min/max для графиков. Проверьте данные");
+                Console.WriteLine(ei);
             }
-               
+
 
             chart1.Series.Clear();
             chart2.Series.Clear();
             chart3.Series.Clear();
-            CreateSerie(0, 1, "m(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
-            CreateSerie(0, 3, "m+(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
-            CreateSerie(0, 4, "m-(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
+            CreateSerie(0, 1, "m(t)", chart2, dataGridView2);
+            CreateSerie(0, 3, "m+(t)", chart2, dataGridView2);
+            CreateSerie(0, 4, "m-(t)", chart2, dataGridView2);
             if (checkedListBox1.CheckedItems.Count != 0)
             {
                 // If so, loop through all checked items and print results.
-                Console.WriteLine("alpha_minus_min {0}", alpha_minus_min);
+                /*Console.WriteLine("__alpha_minus_low__ {0}", __alpha_minus_low__);
                 Console.WriteLine("alpha_plus_max {0}", alpha_plus_max);
-                Console.WriteLine("m_minus_min {0}", m_minus_min);
-                Console.WriteLine("m_minus_max {0}", m_plus_max);
-                 
-/*                 CreateSerie(0, 1, "t_m", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);
-                 CreateSerie(0, 3, "t_m+", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);
-                 CreateSerie(0, 4, "t_m-", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);*/
-               try {
+                Console.WriteLine("__m_minus_low__ {0}", __m_minus_low__);
+                Console.WriteLine("m_minus_max {0}", __m_plus_high__);*/
+
+                /*                 CreateSerie(0, 1, "t_m", chart3, false, 1, __m_minus_low__, __m_plus_high__, dataGridView2);
+                                 CreateSerie(0, 3, "t_m+", chart3, false, 1, __m_minus_low__, __m_plus_high__, dataGridView2);
+                                 CreateSerie(0, 4, "t_m-", chart3, false, 1, __m_minus_low__, __m_plus_high__, dataGridView2);*/
+                try
+                {
                     for (int x = 0; x < checkedListBox1.Items.Count; x++)
                     {
                         if (checkedListBox1.GetItemChecked(x))
@@ -665,23 +688,23 @@ namespace WindowsFormsApp1
                             switch (x)
                             {
                                 case 0:
-                                    CreateSerie(1, 2, "m_alpha", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    CreateSerie(1, 2, "m (alpha)", chart1, dataGridView2);
                                     break;
                                 case 1:
-                                    CreateSerie(3, 5, "m+_alpha+", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    CreateSerie(3, 5, "m+ (alpha+)", chart1, dataGridView2);
 
                                     break;
                                 case 2:
-                                    CreateSerie(4, 6, "m-_alpha-", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    CreateSerie(4, 6, "m- (alpha-)", chart1, dataGridView2);
                                     break;
                                 case 3:
-                                    CreateSerie(7, 8, "mprogn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    CreateSerie(7, 8, "mprogn (alpha-progn)", chart1, dataGridView2);
                                     break;
                                 case 4:
-                                    CreateSerie(9, 11, "m+progn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    CreateSerie(9, 11, "m+progn (alpha-progn)", chart1, dataGridView2);
                                     break;
                                 case 5:
-                                    CreateSerie(10, 12, "m-progn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    CreateSerie(10, 12, "m-progn (alpha-progn)", chart1, dataGridView2);
                                     break;
 
                             }
@@ -691,6 +714,7 @@ namespace WindowsFormsApp1
                 catch (Exception ee1)
                 {
                     MessageBox.Show("Мы не смогли построить один или несколько графиков. Попробуйте убрать галочки или проверить данные");
+                    Console.WriteLine(ee1);
                 }
 
             }
@@ -703,11 +727,16 @@ namespace WindowsFormsApp1
             charts_init(chart6, decomp4_min, decomp4_max);
             for (int x = 1; x <= checkedListBox3.Items.Count; x++)
             {
-                if (checkedListBox3.GetItemChecked(x-1))
+                if (checkedListBox3.GetItemChecked(x - 1))
                 {
-                    CreateSerie(0, x, Convert.ToString(x), chart6, true, 1, alpha_minus_min, alpha_plus_max, dataGridView1);
+                    CreateSerie(0, x, Convert.ToString(x), chart6, dataGridView1);
                 }
             }
+        }
+
+        private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            listbox1_update_indexes();
         }
         private void Decomposition2()
         {
@@ -762,6 +791,7 @@ namespace WindowsFormsApp1
             {
                 Console.WriteLine("На ввод принимаются только числа.");
                 MessageBox.Show("На ввод принимаются только числа.");
+                Console.WriteLine(exep);
             }
 
 
@@ -837,81 +867,12 @@ namespace WindowsFormsApp1
             catch (Exception e11)
             {
                 MessageBox.Show("Ошибка в перемещении элементов. Проверьте, что вы выбрали метку.");
+                Console.WriteLine(e11);
             }
 
-            string[] blocks_n_points = last_points_str.Split(',');
-            int elem_count = 0;
-            foreach (char c in last_points_str)
-                if (c == ',') elem_count++;
-            //Теряем одну точку из-за того, что последний символ != ,
-            elem_count += 1;
-            int block_a = 0, block_b = 0, block_c = 0, block_d = 0, block_e = 0, block_f = 0, block_g = 0, block_h = 0, block_i = 0, block_j = 0;
-            //"A-1,A-2,B-3,B-4,A-5"
-            //[A-1] [A-2] [B-3] 
-            //max count of blocks has hand-validation
-            int[] array = new int[10];
+
             
-            for (int iter = 0; iter<elem_count; iter++)
-            {
-              
-                    switch (blocks_n_points[iter].Split('-')[0])
-                    {
-                        case "A":
-                            array[0] = array[0] + 1;
-                            break;
-                        case "B":
-                            array[1] = array[1] + 1;
-                            break;
-                        case "C":
-                            array[2] = array[2] + 1;
-                            break;
-                        case "D":
-                            array[3] = array[3] + 1;
-                            break;
-                        case "E":
-                            array[4] = array[4] + 1;
-                            break;
-                        case "F":
-                            array[5] = array[5] + 1;
-                            break;
-                        case "G":
-                            array[6] = array[6] + 1;
-                            break;
-                        case "H":
-                            array[7] = array[7] + 1;
-                            break;
-                        case "I":
-                            array[8] = array[8] + 1;
-                            break;
-                        case "J":
-                            array[9] = array[9] + 1;
-                            break;
-
-
-                    
-
-                }
-                bool flag = true;
-                int i = 0;
-                //"3 3 0"
-                while (flag && i<array.Length-1)
-                {
-
-                    if ((array[i] != 0 && array[i + 1] != 0) && (array[i] != array[i + 1]))
-                        flag = false;
-
-                    
-                    i++;
-                }
-                if (flag) {
-                    label9.Text = "Количество точек на блоках совпадает. Все ОК";
-                    
-                }
-                else
-                    label9.Text = "Ошибка. Количество точек на блоках НЕ совпадает.";
-                
-            }
-            Console.WriteLine("array[0] = {0}", array[0]);
+            
 
 
         }
@@ -995,6 +956,7 @@ namespace WindowsFormsApp1
             catch (Exception e11)
             {
                 MessageBox.Show("Ошибка в перемещении элементов. Проверьте, что вы выбрали метку.");
+                Console.WriteLine(e11);
             }
         }
 
@@ -1058,9 +1020,9 @@ namespace WindowsFormsApp1
             string[] name = { "Эпоха", "M", "alfa секунды", "M+", "M-", "alfa+ секунды", "alfa- секунды", "M(прогн)", "alfa(прогн) секунды", "M+(прогн)", "M-(прогн)", "alfa+(прогн) секунды", "alfa-(прогн) секунды", "L", "R", "Устойчивость" };
             double M = 0, M_plus = 0, M_minus = 0, alfa = 0, alfa_plus = 0, alfa_minus = 0, M_prev = 0, M_prev_plus = 0, M_prev_minus = 0, M_progn = 0, M_plus_progn = 0, M_minus_progn = 0, alfa_progn = 0, alfa_plus_progn = 0, alfa_minus_progn = 0, sum_M = 0, sum_M_plus = 0, sum_M_minus = 0, M_progn_prev = 0, alfa_progn_prev = 0, sum_alfa = 0, sum_alfa_plus = 0, sum_alfa_minus = 0, M_progn_prev_plus = 0, M_progn_prev_minus = 0, alfa_progn_prev_plus = 0, alfa_progn_prev_minus = 0, L = 0, M_null = 0, R = 0, sum_M_progn = 0, sum_Mplus_progn = 0, sum_Mminus_progn = 0, sum_alfa_progn = 0, sum_alfaplus_progn = 0, sum_alfaminus_progn = 0;
             alpha_plus_max_dec2 = 0;
-            alpha_minus_min_dec2 = 999999;
-            m_minus_min_dec2 = 999999;
-            m_plus_max_dec2 = 0;
+            __alpha_minus_low___dec2 = 999999;
+            __m_minus_low___dec2 = 999999;
+            __m_plus_high___dec2 = 0;
             dataGridView4.Columns.Clear();
             dataGridView4.Rows.Clear();
             for (int i = 0; i < name.Length; i++)
@@ -1079,13 +1041,13 @@ namespace WindowsFormsApp1
                 for (int j = 1; j < dataGridView3.Columns.Count; j++)
                 {
                     M += Math.Pow(Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value), 2);
-                    M_plus += Math.Pow(Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) + par_E, 2);
-                    M_minus += Math.Pow(Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) - par_E, 2);
+                    M_plus += Math.Pow(Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) + parameter_E, 2);
+                    M_minus += Math.Pow(Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) - parameter_E, 2);
 
                     alfa += Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) * Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value);
-                    alfa_plus += (Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) + par_E) * (Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) + par_E);
-                    //Console.WriteLine(Convert.ToString(Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) + par_E));
-                    alfa_minus += (Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) - par_E) * (Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) - par_E);
+                    alfa_plus += (Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) + parameter_E) * (Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) + parameter_E);
+                    //Console.WriteLine(Convert.ToString(Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) + parameter_E));
+                    alfa_minus += (Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) - parameter_E) * (Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) - parameter_E);
 
                     /*                        Console.WriteLine(Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value));
                                             Console.WriteLine(Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value));*/
@@ -1136,10 +1098,10 @@ namespace WindowsFormsApp1
                 sum_alfa_plus += alfa_plus;
                 sum_alfa_minus += alfa_minus;
 
-                if (alfa_minus < alpha_minus_min_dec2)
-                    alpha_minus_min_dec2 = alfa_minus;
-                if (Math.Sqrt(M_minus) < m_minus_min_dec2)
-                    m_minus_min_dec2 = Math.Sqrt(M_minus);
+                if (alfa_minus < __alpha_minus_low___dec2)
+                    __alpha_minus_low___dec2 = alfa_minus;
+                if (Math.Sqrt(M_minus) < __m_minus_low___dec2)
+                    __m_minus_low___dec2 = Math.Sqrt(M_minus);
 
 
 
@@ -1147,8 +1109,8 @@ namespace WindowsFormsApp1
 
                 if (alfa_plus > alpha_plus_max_dec2)
                     alpha_plus_max_dec2 = alfa_plus;
-                if (Math.Sqrt(M_plus) > m_plus_max_dec2)
-                    m_plus_max_dec2 = Math.Sqrt(M_plus);
+                if (Math.Sqrt(M_plus) > __m_plus_high___dec2)
+                    __m_plus_high___dec2 = Math.Sqrt(M_plus);
                 
 
                 M = 0;
@@ -1163,10 +1125,10 @@ namespace WindowsFormsApp1
             {
                 if (i == 0)
                 {
-                    M_progn = par_A * Convert.ToDouble(dataGridView4.Rows[0].Cells[1].Value) + (1 - par_A) * (sum_M / (dataGridView4.Rows.Count - 2));
+                    M_progn = __parameter_A__ * Convert.ToDouble(dataGridView4.Rows[0].Cells[1].Value) + (1 - __parameter_A__) * (sum_M / (dataGridView4.Rows.Count - 2));
                  
-                    M_plus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[0].Cells[3].Value) + (1 - par_A) * (sum_M_plus / (dataGridView4.Rows.Count - 2));
-                    M_minus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[0].Cells[4].Value) + (1 - par_A) * (sum_M_minus / (dataGridView4.Rows.Count - 2));
+                    M_plus_progn = __parameter_A__ * Convert.ToDouble(dataGridView4.Rows[0].Cells[3].Value) + (1 - __parameter_A__) * (sum_M_plus / (dataGridView4.Rows.Count - 2));
+                    M_minus_progn = __parameter_A__ * Convert.ToDouble(dataGridView4.Rows[0].Cells[4].Value) + (1 - __parameter_A__) * (sum_M_minus / (dataGridView4.Rows.Count - 2));
 
                     dataGridView4.Rows[i].Cells[7].Value = M_progn;
                     dataGridView4.Rows[i].Cells[8].Value = 0;
@@ -1196,12 +1158,12 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    M_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) + (1 - par_A) * M_progn_prev;
-                    alfa_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[2].Value) + (1 - par_A) * alfa_progn_prev;
-                    M_plus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[3].Value) + (1 - par_A) * M_progn_prev_plus;
-                    M_minus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[4].Value) + (1 - par_A) * M_progn_prev_minus;
-                    alfa_plus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[5].Value) + (1 - par_A) * alfa_progn_prev_plus;
-                    alfa_minus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[6].Value) + (1 - par_A) * alfa_progn_prev_minus;
+                    M_progn = __parameter_A__ * Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) + (1 - __parameter_A__) * M_progn_prev;
+                    alfa_progn = __parameter_A__ * Convert.ToDouble(dataGridView4.Rows[i].Cells[2].Value) + (1 - __parameter_A__) * alfa_progn_prev;
+                    M_plus_progn = __parameter_A__ * Convert.ToDouble(dataGridView4.Rows[i].Cells[3].Value) + (1 - __parameter_A__) * M_progn_prev_plus;
+                    M_minus_progn = __parameter_A__ * Convert.ToDouble(dataGridView4.Rows[i].Cells[4].Value) + (1 - __parameter_A__) * M_progn_prev_minus;
+                    alfa_plus_progn = __parameter_A__ * Convert.ToDouble(dataGridView4.Rows[i].Cells[5].Value) + (1 - __parameter_A__) * alfa_progn_prev_plus;
+                    alfa_minus_progn = __parameter_A__ * Convert.ToDouble(dataGridView4.Rows[i].Cells[6].Value) + (1 - __parameter_A__) * alfa_progn_prev_minus;
                     dataGridView4.Rows[i].Cells[7].Value = M_progn;
                     dataGridView4.Rows[i].Cells[8].Value = alfa_progn;
                     dataGridView4.Rows[i].Cells[9].Value = M_plus_progn;
@@ -1260,14 +1222,14 @@ namespace WindowsFormsApp1
 
             }
 
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[7].Value = par_A * (sum_M_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[7].Value);
+            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[7].Value = __parameter_A__ * (sum_M_progn / (dataGridView4.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[7].Value);
             Console.WriteLine("Среднее знач M прогн {0}", sum_M_progn / (dataGridView4.Rows.Count - 2));
             Console.WriteLine("Последнее значение {0}", Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[7].Value));
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[8].Value = par_A * (sum_alfa_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[8].Value);
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[9].Value = par_A * (sum_Mplus_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[9].Value);
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[10].Value = par_A * (sum_Mminus_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[10].Value);
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[11].Value = par_A * (sum_alfaplus_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[11].Value);
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[12].Value = par_A * (sum_alfaminus_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[12].Value);
+            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[8].Value = __parameter_A__ * (sum_alfa_progn / (dataGridView4.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[8].Value);
+            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[9].Value = __parameter_A__ * (sum_Mplus_progn / (dataGridView4.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[9].Value);
+            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[10].Value = __parameter_A__ * (sum_Mminus_progn / (dataGridView4.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[10].Value);
+            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[11].Value = __parameter_A__ * (sum_alfaplus_progn / (dataGridView4.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[11].Value);
+            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[12].Value = __parameter_A__ * (sum_alfaminus_progn / (dataGridView4.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[12].Value);
             L = Math.Abs(Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[9].Value) - Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[10].Value));
             R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[7].Value) - M_null) / 2);
             dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[13].Value = L;
@@ -1302,8 +1264,8 @@ namespace WindowsFormsApp1
         {
             chart3.Series.Clear();
             chart5.Series.Clear();
-            charts_init(chart3, alpha_minus_min_dec2, alpha_plus_max_dec2); //Incorrect
-            charts_init(chart5, m_minus_min_dec2, m_plus_max_dec2); //Incorrect
+            charts_init(chart3, __alpha_minus_low___dec2, alpha_plus_max_dec2); //Incorrect
+            charts_init(chart5, __m_minus_low___dec2, __m_plus_high___dec2); //Incorrect
 
 
             for (int x = 0; x < checkedListBox2.Items.Count; x++)
@@ -1314,27 +1276,27 @@ namespace WindowsFormsApp1
                     switch (x)
                     {
                         case 0:
-                            CreateSerie(1, 2, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min_dec2, alpha_plus_max, dataGridView4);
+                            CreateSerie(1, 2, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
                             break;
                         case 1:
-                            CreateSerie(3, 5, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min_dec2, alpha_plus_max, dataGridView4);
+                            CreateSerie(3, 5, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
                             break;
                         case 2:
-                            CreateSerie(4, 6, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min_dec2, alpha_plus_max, dataGridView4);
+                            CreateSerie(4, 6, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
                             break;
                         case 3:
-                            CreateSerie(7, 8, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            CreateSerie(7, 8, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
                             break;
                         case 4:
-                            CreateSerie(9, 11, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            CreateSerie(9, 11, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
                             break;
                         case 5:
-                            CreateSerie(10, 12, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            CreateSerie(10, 12, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
                             break;
                         case 6:
-                            CreateSerie(0, 1, checkedListBox2.Items[x].ToString(), chart5, true, 1, m_minus_min_dec2, m_plus_max_dec2, dataGridView4);
-                            CreateSerie(0, 3, checkedListBox2.Items[x].ToString() + "_", chart5, true, 1, m_minus_min_dec2,m_plus_max_dec2, dataGridView4);
-                            CreateSerie(0, 4, checkedListBox2.Items[x].ToString() + "__", chart5, true, 1, m_minus_min_dec2, m_plus_max_dec2, dataGridView4);
+                            CreateSerie(0, 1, checkedListBox2.Items[x].ToString(), chart5,dataGridView4);
+                            CreateSerie(0, 3, checkedListBox2.Items[x].ToString() + "_", chart5, dataGridView4);
+                            CreateSerie(0, 4, checkedListBox2.Items[x].ToString() + "__", chart5, dataGridView4);
                             break;
                         
 
@@ -1355,10 +1317,15 @@ namespace WindowsFormsApp1
 
         private void checkedListBox3_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-
+            listbox1_update_indexes();
         }
 
         private void tabPage6_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
         {
 
         }

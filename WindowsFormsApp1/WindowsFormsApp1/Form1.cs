@@ -63,9 +63,15 @@ namespace WindowsFormsApp1
             button3.Enabled = false;
             button4.Enabled = false;
             this.comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-            ToolTip t = new ToolTip();
-            //t.SetToolTip(button9, "--__--");
-
+            this.comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBox2.Enabled = false;
+            groupBox2.Text = "1) Нажмите кнопку 'Загрузить данные' чтобы загрузить базу данных. \n" +
+                  "2) Выберите таблицу которую хотите отобразить. \n"+
+                  "3) При изменении параметров E и A нужно нажать кнопку 'Сохранить изменения'.";
+            groupBox3.Text = "1) Укажите количество блоков. \n" +
+                              "2) Выберите блок, в который хотите переносить марки. \n" +
+                              "3) Из списка марок 'Все метки' перетащите марки в список 'Выбранные метки' при помощи соответствующих кнопок. \n" +
+                              "4) Чтобы увидеть координаты точек выбранного блока, нажмите на кнопку 'Применить'.";
         }
 
         public Image ByteToImage(byte[] imageBytes)
@@ -93,7 +99,7 @@ namespace WindowsFormsApp1
             else return false;
         }
 
-        private string SQL_ALLTable() { return "SELECT * FROM Данные order by 1"; }
+        private string SQL_ALLTable() { return "SELECT * FROM " + comboBox2.SelectedItem + " order by 1"; }
         private string SQL_EATable1() { return "SELECT value FROM `parameters`"; }
 
         private void ShowTable(string SQLQuery)
@@ -117,19 +123,7 @@ namespace WindowsFormsApp1
                 dataGridView1.Rows.Add(dTable.Rows[row].ItemArray);
 
             }
-            for (int i = 1; i < dataGridView1.Rows.Count; i++)
-            {
-                //begin from 1 to kick column[0] - epocha
-                for (int j = 1; j < dataGridView1.Rows[i].Cells.Count; j++)
-                {
-                    double curr_val = Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value);
-
-                    if ((curr_val > decomp4_max) && ((curr_val > decomp4_min) || decomp4_max == -1))
-                        decomp4_max = curr_val;
-                    if ((curr_val < decomp4_min) && ((curr_val < decomp4_max) || decomp4_max == -1) && (curr_val != 0))
-                        decomp4_min = curr_val;
-                }
-            }
+          
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -176,19 +170,25 @@ namespace WindowsFormsApp1
                             ALabel.Text = textBox2.Text;
                             par_A = row.Field<double>("value");
                         }
-                        ShowTable(SQL_ALLTable());
-                        tabPage2.Parent = tabControl1;
-                        tabPage3.Parent = tabControl1;
-                        tabPage5.Parent = tabControl1;
-                        button1.Enabled = true;
-                        button3.Enabled = true;
-                        button4.Enabled = true;
+
                     }
                 }
                 catch (Exception except)
                 {
                     MessageBox.Show("Ошибка при подключении к базе. \n\n\n" + Convert.ToString(except));
                 }
+                string SQLQuery = "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;";
+                SQLiteCommand command2 = new SQLiteCommand(SQLQuery, SQLiteConn);
+                SQLiteDataReader reader = command2.ExecuteReader();
+                comboBox2.Enabled = true;
+                comboBox2.Items.Clear();
+                while (reader.Read()) { 
+                    comboBox2.Items.Add(reader[0].ToString());
+                }
+                comboBox2.Items.Remove("parameters");
+                comboBox2.Items.Remove("sqlite_sequence");
+                comboBox2.Items.Remove("images");
+
             }
             
             
@@ -196,7 +196,7 @@ namespace WindowsFormsApp1
 
         private void button3_Click(object sender, EventArgs e) // Удаление
         {
-            string sql_query = "DELETE FROM `Данные` WHERE `Эпоха` = " + Convert.ToString(dataGridView1.Rows.Count - 2);
+            string sql_query = "DELETE FROM " + comboBox2.SelectedItem + " WHERE `Эпоха` = " + Convert.ToString(dataGridView1.Rows.Count - 2);
             Console.WriteLine(sql_query);
             SQLiteCommand cmd = new SQLiteCommand(sql_query, SQLiteConn);
             SQLiteDataReader rdr = cmd.ExecuteReader();
@@ -209,7 +209,7 @@ namespace WindowsFormsApp1
         {
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
             Random rnd = new Random();
-            string sql_query = "INSERT INTO `Данные` VALUES (" + Convert.ToString(dataGridView1.Rows.Count - 1) + ", ";
+            string sql_query = "INSERT INTO "+comboBox2.SelectedItem + " VALUES (" + Convert.ToString(dataGridView1.Rows.Count - 1) + ", ";
             double val;
             double max = 0;
             for (int i = 1; i < dataGridView1.Columns.Count; i++) // Первый столбец без значений
@@ -251,55 +251,65 @@ namespace WindowsFormsApp1
 
         public void CreateSerie(int cells_x, int cells_y, string inp_nameSerie, Chart inp_chartName, bool isNeedXCut, long koeff_umnozhenia, double y_min, double y_max, DataGridView inp_datagrid)
         {
-            double x, y;
-           
-            string Serie1 = inp_nameSerie;
-            //Console.WriteLine("------------------------------");
-            //Console.WriteLine(inp_nameSerie);
-
-            inp_chartName.Series.Add(new Series(Serie1));
-            inp_chartName.Series[Serie1].ChartType = (System.Windows.Forms.DataVisualization.Charting.SeriesChartType)4;
-            inp_chartName.Series[Serie1].Enabled = true;
-            inp_chartName.Series[Serie1].BorderWidth = 2;
-            inp_chartName.Series[Serie1].MarkerStyle = MarkerStyle.Circle;
-            inp_chartName.Series[Serie1].MarkerColor = Color.Red;
-            inp_chartName.Series[Serie1].MarkerSize = 4;
-            
-            if (inp_chartName == chart1 || inp_chartName == chart3) {
-                inp_chartName.ChartAreas[0].AxisX.Title = "m";
-                inp_chartName.ChartAreas[0].AxisY.Title = "alpha";
-            }
-            if (inp_chartName == chart2)
-            {
-                inp_chartName.ChartAreas[0].AxisX.Title = "t";
-                inp_chartName.ChartAreas[0].AxisY.Title = "m";
-            }
-            if (inp_chartName == chart6)
-            {
-                inp_chartName.ChartAreas[0].AxisX.Title = "t";
-                inp_chartName.ChartAreas[0].AxisY.Title = "H";
-            }
-
-            for (int p = 0; p < inp_datagrid.Rows.Count - 2; p++)
+            try
             {
 
-               
-                x = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_x].Value);
-                if (isNeedXCut) 
-                    x = x - x % 0.0001;
-                y = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_y].Value) * koeff_umnozhenia;
 
-                //Console.WriteLine("\n" + inp_nameSerie + " - " + x + " | " + y);
-                inp_chartName.Series[Serie1].Points.AddXY(x, y);
-                inp_chartName.Series[Serie1].Points[p].Label = Convert.ToString(p);
-       
+                double x, y;
 
+                string Serie1 = inp_nameSerie;
+                //Console.WriteLine("------------------------------");
+                //Console.WriteLine(inp_nameSerie);
+
+                inp_chartName.Series.Add(new Series(Serie1));
+                inp_chartName.Series[Serie1].ChartType = (System.Windows.Forms.DataVisualization.Charting.SeriesChartType)4;
+                inp_chartName.Series[Serie1].Enabled = true;
+                inp_chartName.Series[Serie1].BorderWidth = 2;
+                inp_chartName.Series[Serie1].MarkerStyle = MarkerStyle.Circle;
+                inp_chartName.Series[Serie1].MarkerColor = Color.Red;
+                inp_chartName.Series[Serie1].MarkerSize = 4;
+
+                if (inp_chartName == chart1 || inp_chartName == chart3)
+                {
+                    inp_chartName.ChartAreas[0].AxisX.Title = "m";
+                    inp_chartName.ChartAreas[0].AxisY.Title = "alpha";
+                }
+                if (inp_chartName == chart2)
+                {
+                    inp_chartName.ChartAreas[0].AxisX.Title = "t";
+                    inp_chartName.ChartAreas[0].AxisY.Title = "m";
+                }
+                if (inp_chartName == chart6)
+                {
+                    inp_chartName.ChartAreas[0].AxisX.Title = "t";
+                    inp_chartName.ChartAreas[0].AxisY.Title = "H";
+                }
+
+                for (int p = 0; p < inp_datagrid.Rows.Count - 2; p++)
+                {
+
+
+                    x = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_x].Value);
+                    if (isNeedXCut)
+                        x = x - x % 0.0001;
+                    y = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_y].Value) * koeff_umnozhenia;
+
+                    //Console.WriteLine("\n" + inp_nameSerie + " - " + x + " | " + y);
+                    inp_chartName.Series[Serie1].Points.AddXY(x, y);
+                    inp_chartName.Series[Serie1].Points[p].Label = Convert.ToString(p);
+
+
+                }
+                //Console.WriteLine("------------------------------");
+                //inp_chartName.ChartAreas[0].AxisY.Minimum = y_min;
+                //inp_chartName.ChartAreas[0].AxisY.Maximum = y_max;
+                //inp_chartName.ChartAreas[0].AxisY.Minimum = 48;
+                //inp_chartName.ChartAreas[0].AxisY.Maximum = 49;
             }
-            //Console.WriteLine("------------------------------");
-            //inp_chartName.ChartAreas[0].AxisY.Minimum = y_min;
-            //inp_chartName.ChartAreas[0].AxisY.Maximum = y_max;
-            //inp_chartName.ChartAreas[0].AxisY.Minimum = 48;
-            //inp_chartName.ChartAreas[0].AxisY.Maximum = 49;
+            catch (Exception exxx)
+            {
+                MessageBox.Show("Ошибка в построение график {comboBox2.SelectedItem}");
+            }
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -309,6 +319,14 @@ namespace WindowsFormsApp1
             try
             {
                 par_E = Convert.ToDouble(textBox1.Text);
+                if (par_E < 0)
+                {
+                    ELabel.Text = "0 , ";
+                    MessageBox.Show("E должно быть больше 0!");
+                    par_E = 0;
+
+                    textBox1.Text = "0";
+                }
             }
             catch (Exception e1)
             {
@@ -317,6 +335,14 @@ namespace WindowsFormsApp1
             try
             {
                 par_A = Convert.ToDouble(textBox2.Text);
+                if (par_A  < 0 || par_A > 1)
+                {
+                    ALabel.Text = "0";
+                    MessageBox.Show("A должно быть больше 0 и меньше 1!");
+                    par_A = 0;
+
+                    textBox2.Text = "0";
+                }
             }
             catch (Exception e2)
             {
@@ -324,6 +350,20 @@ namespace WindowsFormsApp1
             }
 
            
+        }
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox2.SelectedIndex != -1)
+            {
+                string Query = "SELECT * FROM " + comboBox2.SelectedItem;
+                ShowTable(Query);
+                tabPage2.Parent = tabControl1;
+                tabPage3.Parent = tabControl1;
+                tabPage5.Parent = tabControl1;
+                button1.Enabled = true;
+                button3.Enabled = true;
+                button4.Enabled = true;
+            }
         }
 
         public void Decomposition1()
@@ -570,6 +610,11 @@ namespace WindowsFormsApp1
 
             Decomposition1();
 
+            chart1.Series.Clear();
+            chart2.Series.Clear();
+            chart3.Series.Clear();
+            chart5.Series.Clear();
+
             for (int x = 0; x < checkedListBox1.Items.Count; x++)
             {
                 checkedListBox1.SetItemChecked(x, true);
@@ -588,6 +633,9 @@ namespace WindowsFormsApp1
             chart1.Series.Clear();
             chart2.Series.Clear();
             chart3.Series.Clear();
+            CreateSerie(0, 1, "m(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
+            CreateSerie(0, 3, "m+(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
+            CreateSerie(0, 4, "m-(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
             if (checkedListBox1.CheckedItems.Count != 0)
             {
                 // If so, loop through all checked items and print results.
@@ -595,9 +643,7 @@ namespace WindowsFormsApp1
                 Console.WriteLine("alpha_plus_max {0}", alpha_plus_max);
                 Console.WriteLine("m_minus_min {0}", m_minus_min);
                 Console.WriteLine("m_minus_max {0}", m_plus_max);
-                 CreateSerie(0, 1, "m(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
-                 CreateSerie(0, 3, "m+(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
-                 CreateSerie(0, 4, "m-(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
+                 
 /*                 CreateSerie(0, 1, "t_m", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);
                  CreateSerie(0, 3, "t_m+", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);
                  CreateSerie(0, 4, "t_m-", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);*/
@@ -623,10 +669,10 @@ namespace WindowsFormsApp1
                                 CreateSerie(7, 8, "mprogn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
                                 break;
                             case 4:
-                                CreateSerie(9, 11, "9_11", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                CreateSerie(9, 11, "m+progn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
                                 break;
                             case 5:
-                                CreateSerie(10, 12, "10_12", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                CreateSerie(10, 12, "m-progn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
                                 break;
 
                         }
@@ -885,8 +931,37 @@ namespace WindowsFormsApp1
             try
             {
                 double temp = 0;
+                
+               
+
+                //Получаем в формате "Блок A"
+                string cur_block = Convert.ToString(comboBox1.SelectedItem);
+                string[] blocks_n_points = last_points_str.Split(',');
+                int elem_count = 0;
+                foreach (char c in last_points_str)
+                    if (c == ',') elem_count++;
+                //Теряем одну точку из-за того, что последний символ != ,
+                elem_count += 1;
+
+                for (int tempor = 0; tempor < elem_count; tempor++)
+                {
+                    string cur_point = cur_block.Split(' ')[1] + "-" + listBox2.SelectedItem;
+                    if (blocks_n_points[tempor] == cur_point)
+                        blocks_n_points[tempor] = "";
+                }
+
+                
+                last_points_str = "";
+                for (int tempor = 0; tempor < elem_count; tempor++)
+                {
+                    last_points_str += blocks_n_points[tempor] + ",";
+                }
+                last_points_str = last_points_str.Replace(",,", ",");
+                last_points_str = last_points_str.Trim(',');
+                Console.WriteLine("last_points_str = {0}", last_points_str);
                 listBox1.Items.Add(listBox2.SelectedItem);
                 listBox2.Items.Remove(listBox2.SelectedItem);
+
                 if (listBox1.Items.Count > 1)
                 {
                     for (int i = 0; i < listBox1.Items.Count; i++)
@@ -940,234 +1015,21 @@ namespace WindowsFormsApp1
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (tabControl1.SelectedTab == tabControl1.TabPages["tabPage7"])
+            if (tabControl1.SelectedTab == tabControl1.TabPages["tabPage5"])
             {
- string[] name = { "Эпоха", "M", "alfa секунды", "M+", "M-", "alfa+ секунды", "alfa- секунды", "M(прогн)", "alfa(прогн) секунды", "M+(прогн)", "M-(прогн)", "alfa+(прогн) секунды", "alfa-(прогн) секунды", "L", "R", "Устойчивость" };
-            double M = 0, M_plus = 0, M_minus = 0, alfa = 0, alfa_plus = 0, alfa_minus = 0, M_prev = 0, M_prev_plus = 0, M_prev_minus = 0, M_progn = 0, M_plus_progn = 0, M_minus_progn = 0, alfa_progn = 0, alfa_plus_progn = 0, alfa_minus_progn = 0, sum_M = 0, sum_M_plus = 0, sum_M_minus = 0, M_progn_prev = 0, alfa_progn_prev = 0, sum_alfa = 0, sum_alfa_plus = 0, sum_alfa_minus = 0, M_progn_prev_plus = 0, M_progn_prev_minus = 0, alfa_progn_prev_plus = 0, alfa_progn_prev_minus = 0, L = 0, M_null = 0, R = 0, sum_M_progn = 0, sum_Mplus_progn = 0, sum_Mminus_progn = 0, sum_alfa_progn = 0, sum_alfaplus_progn = 0, sum_alfaminus_progn = 0;
-            alpha_plus_max_dec2 = 0;
-            alpha_minus_min_dec2 = 999999;
-            m_minus_min_dec2 = 999999;
-            m_plus_max_dec2 = 0;
-            dataGridView4.Columns.Clear();
-            dataGridView4.Rows.Clear();
-            for (int i = 0; i < name.Length; i++)
-            {
-                dataGridView4.Columns.Add(name[i], name[i]);
-                dataGridView4.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-            }
-            for (int i = 0; i < dataGridView3.Rows.Count - 1; i++)
-            {
-                dataGridView4.Rows.Add(dataGridView3.Rows[i].Cells[0].Value); ;
-            }
-            dataGridView4.Rows.Add("Прогноз");
-            for (int i = 0; i < dataGridView3.Rows.Count - 1; i++) //M и alfa
-            {
-                
-                for (int j = 1; j < dataGridView3.Columns.Count; j++)
+                for (int i = 1; i < dataGridView1.Rows.Count; i++)
                 {
-                    M += Math.Pow(Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value), 2);
-                    M_plus += Math.Pow(Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) + par_E, 2);
-                    M_minus += Math.Pow(Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) - par_E, 2);
+                    //begin from 1 to kick column[0] - epocha
+                    for (int j = 1; j < dataGridView1.Rows[i].Cells.Count; j++)
+                    {
+                        double curr_val = Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value);
 
-                    alfa += Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) * Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value);
-                    alfa_plus += (Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) + par_E) * (Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) + par_E);
-                    //Console.WriteLine(Convert.ToString(Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) + par_E));
-                    alfa_minus += (Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) - par_E) * (Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) - par_E);
-
-                    /*                        Console.WriteLine(Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value));
-                                            Console.WriteLine(Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value));*/
-
+                        if ((curr_val > decomp4_max) && ((curr_val > decomp4_min) || decomp4_max == -1))
+                            decomp4_max = curr_val;
+                        if ((curr_val < decomp4_min) && ((curr_val < decomp4_max) || decomp4_max == -1) && (curr_val != 0))
+                            decomp4_min = curr_val;
+                    }
                 }
-                if (i == 0)
-                {
-                    /*Console.WriteLine("Присвоили М первой = {0}. Альфы = 0 ", Math.Sqrt(M));*/
-                    M_prev = M;
-                    M_prev_plus = M_plus;
-                    M_prev_minus = M_minus;
-                    alfa = 0;
-                    alfa_minus = 0;
-                    alfa_plus = 0;
-
-                }
-                else
-                {
-                    //Console.WriteLine("М первая {0}", Math.Sqrt(M_prev));
-                    //Console.WriteLine("М {0}", Math.Sqrt(M));
-
-                    alfa = alfa / (Math.Sqrt(M_prev) * Math.Sqrt(M));
-                    /* Console.WriteLine("alpa_plus = {0}", alfa_plus);*/
-                    alfa_plus = alfa_plus / (Math.Sqrt(M_prev_plus) * Math.Sqrt(M_plus));
-                    /*double temp = (Math.Sqrt(M_prev_plus) * Math.Sqrt(M_plus));
-                    Console.WriteLine("Делим это на {0} = {1}",temp, alfa_plus);*/
-                    alfa_minus = alfa_minus / (Math.Sqrt(M_prev_minus) * Math.Sqrt(M_minus));
-                    // Console.WriteLine("Альфа поделили {0}", alfa_plus);                
-                    alfa = Math.Acos(alfa)*3600;
-                    /* Console.WriteLine("Ща будем брать acos alfa ({0})", alfa_plus);*/
-                    alfa_plus = Math.Acos(alfa_plus)*3600;
-                    /*  Console.WriteLine("Взяли acos = {0}", alfa_plus);*/
-                    alfa_minus = Math.Acos(alfa_minus)*3600;
-                    //Console.WriteLine("Альфа косинус {0}", alfa_plus);
-                }
-
-
-                dataGridView4.Rows[i].Cells[1].Value = Math.Sqrt(M);
-                dataGridView4.Rows[i].Cells[3].Value = Math.Sqrt(M_plus);
-                dataGridView4.Rows[i].Cells[4].Value = Math.Sqrt(M_minus);
-                dataGridView4.Rows[i].Cells[2].Value = alfa;
-                dataGridView4.Rows[i].Cells[5].Value = alfa_plus;
-                dataGridView4.Rows[i].Cells[6].Value = alfa_minus;
-                sum_M += Math.Sqrt(M);
-                sum_M_plus += Math.Sqrt(M_plus);
-                sum_M_minus += Math.Sqrt(M_minus);
-                sum_alfa += alfa;
-                sum_alfa_plus += alfa_plus;
-                sum_alfa_minus += alfa_minus;
-
-                if (alfa_minus < alpha_minus_min_dec2)
-                    alpha_minus_min_dec2 = alfa_minus;
-                if (Math.Sqrt(M_minus) < m_minus_min_dec2)
-                    m_minus_min_dec2 = Math.Sqrt(M_minus);
-
-                ///y_max
-
-                if (alfa_plus > alpha_plus_max_dec2)
-                    alpha_plus_max_dec2 = alfa_plus;
-                if (M_plus > Math.Sqrt(m_plus_max_dec2))
-                    m_plus_max_dec2 = Math.Sqrt(M_plus);
-
-                M = 0;
-                M_plus = 0;
-                M_minus = 0;
-                alfa = 0;
-                alfa_plus = 0;
-                alfa_minus = 0;
-
-            }
-            for (int i = 0; i < dataGridView4.Rows.Count - 2; i++) //M(прогн) и alfa(прогн)
-            {
-                if (i == 0)
-                {
-                    M_progn = par_A * Convert.ToDouble(dataGridView4.Rows[0].Cells[1].Value) + (1 - par_A) * (sum_M / (dataGridView4.Rows.Count - 2));
-                 
-                    M_plus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[0].Cells[3].Value) + (1 - par_A) * (sum_M_plus / (dataGridView4.Rows.Count - 2));
-                    M_minus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[0].Cells[4].Value) + (1 - par_A) * (sum_M_minus / (dataGridView4.Rows.Count - 2));
-
-                    dataGridView4.Rows[i].Cells[7].Value = M_progn;
-                    dataGridView4.Rows[i].Cells[8].Value = 0;
-                    dataGridView4.Rows[i].Cells[9].Value = M_plus_progn;
-                    dataGridView4.Rows[i].Cells[10].Value = M_minus_progn;
-                    dataGridView4.Rows[i].Cells[11].Value = 0;
-                    dataGridView4.Rows[i].Cells[12].Value = 0;
-                    M_progn_prev = M_progn;
-                    alfa_progn_prev = alfa_progn;
-                    M_progn_prev_plus = M_plus_progn;
-                    M_progn_prev_minus = M_minus_progn;
-                    alfa_progn_prev_plus = alfa_plus_progn;
-                    alfa_progn_prev_minus = alfa_minus_progn;
-                    sum_M_progn += M_progn;
-                    sum_Mplus_progn += M_plus_progn;
-                    sum_Mminus_progn += M_minus_progn;
-                    sum_alfa_progn += alfa_progn;
-                    sum_alfaplus_progn += alfa_plus_progn;
-                    sum_alfaminus_progn += alfa_minus_progn;
-                    alfa_progn = 0;
-                    alfa_plus_progn = 0;
-                    alfa_minus_progn = 0;
-                    M_progn = 0;
-                    M_plus_progn = 0;
-                    M_minus_progn = 0;
-
-                }
-                else
-                {
-                    M_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) + (1 - par_A) * M_progn_prev;
-                    alfa_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[2].Value) + (1 - par_A) * alfa_progn_prev;
-                    M_plus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[3].Value) + (1 - par_A) * M_progn_prev_plus;
-                    M_minus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[4].Value) + (1 - par_A) * M_progn_prev_minus;
-                    alfa_plus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[5].Value) + (1 - par_A) * alfa_progn_prev_plus;
-                    alfa_minus_progn = par_A * Convert.ToDouble(dataGridView4.Rows[i].Cells[6].Value) + (1 - par_A) * alfa_progn_prev_minus;
-                    dataGridView4.Rows[i].Cells[7].Value = M_progn;
-                    dataGridView4.Rows[i].Cells[8].Value = alfa_progn;
-                    dataGridView4.Rows[i].Cells[9].Value = M_plus_progn;
-                    dataGridView4.Rows[i].Cells[10].Value = M_minus_progn;
-                    dataGridView4.Rows[i].Cells[11].Value = alfa_plus_progn;
-                    dataGridView4.Rows[i].Cells[12].Value = alfa_minus_progn;
-                    M_progn_prev = M_progn;
-                    alfa_progn_prev = alfa_progn;
-                    M_progn_prev_plus = M_plus_progn;
-                    M_progn_prev_minus = M_minus_progn;
-                    alfa_progn_prev_plus = alfa_plus_progn;
-                    alfa_progn_prev_minus = alfa_minus_progn;
-                    sum_M_progn += M_progn;
-                    sum_Mplus_progn += M_plus_progn;
-                    sum_Mminus_progn += M_minus_progn;
-                    sum_alfa_progn += alfa_progn;
-                    sum_alfaplus_progn += alfa_plus_progn;
-                    sum_alfaminus_progn += alfa_minus_progn;
-                    alfa_progn = 0;
-                    alfa_plus_progn = 0;
-                    alfa_minus_progn = 0;
-                    M_progn = 0;
-                    M_plus_progn = 0;
-                    M_minus_progn = 0;
-                }
-
-            }
-
-            for (int i = 0; i < dataGridView4.Rows.Count - 1; i++)
-            {
-                if (i == 0)
-                {
-                    M_null = Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value);
-                    R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) - M_null) / 2);
-                }
-
-                L = Math.Abs(Convert.ToDouble(dataGridView4.Rows[i].Cells[3].Value) - Convert.ToDouble(dataGridView4.Rows[i].Cells[4].Value));
-                R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) - M_null) / 2);
-                dataGridView4.Rows[i].Cells[13].Value = L;
-                dataGridView4.Rows[i].Cells[14].Value = R;
-                if (R - L == 0)
-                {
-                    dataGridView4.Rows[i].Cells[15].Value = "Предаварийное";
-                }
-                if (R < L)
-                {
-                    dataGridView4.Rows[i].Cells[15].Value = "Нормальное";
-                }
-                else
-                {
-                    dataGridView4.Rows[i].Cells[15].Value = "Аварийное";
-                }
-
-                L = 0;
-                R = 0;
-
-            }
-
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[7].Value = par_A * (sum_M_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[7].Value);
-            Console.WriteLine("Среднее знач M прогн {0}", sum_M_progn / (dataGridView4.Rows.Count - 2));
-            Console.WriteLine("Последнее значение {0}", Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[7].Value));
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[8].Value = par_A * (sum_alfa_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[8].Value);
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[9].Value = par_A * (sum_Mplus_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[9].Value);
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[10].Value = par_A * (sum_Mminus_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[10].Value);
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[11].Value = par_A * (sum_alfaplus_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[11].Value);
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[12].Value = par_A * (sum_alfaminus_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[12].Value);
-            L = Math.Abs(Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[9].Value) - Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[10].Value));
-            R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[7].Value) - M_null) / 2);
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[13].Value = L;
-            dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[14].Value = R;
-            if (R - L == 0)
-            {
-                dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[15].Value = "Предаварийное";
-            }
-            if (R < L)
-            {
-                dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[15].Value = "Нормальное";
-            }
-            else
-            {
-                dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[15].Value = "Аварийное";
-            }
             }
         }
         private void tabControl2_MouseClick(object sender, MouseEventArgs e)
@@ -1402,6 +1264,7 @@ namespace WindowsFormsApp1
                 dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[15].Value = "Аварийное";
             }
 
+
         }
 
         private void tabControl1_TabIndexChanged(object sender, EventArgs e)
@@ -1474,12 +1337,7 @@ namespace WindowsFormsApp1
 
         }
 
-        private void tabPage2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void tabPage1_Click(object sender, EventArgs e)
+        private void tabPage6_Click(object sender, EventArgs e)
         {
 
         }

@@ -65,13 +65,13 @@ namespace WindowsFormsApp1
             this.comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
             this.comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox2.Enabled = false;
-            groupBox2.Text = "1) Нажмите кнопку 'Загрузить данные' чтобы загрузить базу данных. \n" +
-                  "2) Выберите таблицу которую хотите отобразить. \n"+
-                  "3) При изменении параметров E и A нужно нажать кнопку 'Сохранить изменения'.";
+            groupBox2.Text = "1) Нажмите кнопку \"Загрузить данные\", чтобы загрузить базу данных. \n" +
+                  "2) Выберите таблицу, которую хотите отобразить. \n"+
+                  "3) При изменении параметров E и A, нужно нажать кнопку 'Сохранить изменения'.";
             groupBox3.Text = "1) Укажите количество блоков. \n" +
-                              "2) Выберите блок, в который хотите переносить марки. \n" +
-                              "3) Из списка марок 'Все метки' перетащите марки в список 'Выбранные метки' при помощи соответствующих кнопок. \n" +
-                              "4) Чтобы увидеть координаты точек выбранного блока, нажмите на кнопку 'Применить'.";
+                              "2) Выберите блок, для которого хотите выполнить вычисления. \n" +
+                              "3) Из списка марок \"Все метки\" перетащите марки в список \"Выбранные метки\" при помощи соответствующих кнопок. \n" +
+                              "4) Чтобы увидеть координаты точек выбранного блока, нажмите на кнопку \"Применить\".";
         }
 
         public Image ByteToImage(byte[] imageBytes)
@@ -253,8 +253,6 @@ namespace WindowsFormsApp1
         {
             try
             {
-
-
                 double x, y;
 
                 string Serie1 = inp_nameSerie;
@@ -308,7 +306,7 @@ namespace WindowsFormsApp1
             }
             catch (Exception exxx)
             {
-                MessageBox.Show("Ошибка в построение график {comboBox2.SelectedItem}");
+                MessageBox.Show($"Ошибка в построение графика {inp_nameSerie}");
             }
         }
 
@@ -617,7 +615,7 @@ namespace WindowsFormsApp1
 
             for (int x = 0; x < checkedListBox1.Items.Count; x++)
             {
-                checkedListBox1.SetItemChecked(x, true);
+                checkedListBox1.SetItemChecked(x, false);
             }
             checkedListBox1.SelectedItem = 1;
             Decomposition2();
@@ -626,9 +624,18 @@ namespace WindowsFormsApp1
 
         private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            charts_init(chart1, alpha_minus_min, alpha_plus_max);
-            charts_init(chart2, m_minus_min, m_plus_max);
-
+            try
+            {
+                if (alpha_minus_min != alpha_plus_max)
+                    charts_init(chart1, alpha_minus_min, alpha_plus_max);
+                if (m_minus_min != m_plus_max)
+                    charts_init(chart2, m_minus_min, m_plus_max);
+            }
+            catch (Exception ei)
+            {
+                MessageBox.Show("К сожалению, мы не смогли посчитать min/max для графиков. Проверьте данные");
+            }
+               
 
             chart1.Series.Clear();
             chart2.Series.Clear();
@@ -647,36 +654,41 @@ namespace WindowsFormsApp1
 /*                 CreateSerie(0, 1, "t_m", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);
                  CreateSerie(0, 3, "t_m+", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);
                  CreateSerie(0, 4, "t_m-", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);*/
-
-                for (int x = 0; x < checkedListBox1.Items.Count; x++)
-                {
-                    if (checkedListBox1.GetItemChecked(x))
+               try {
+                    for (int x = 0; x < checkedListBox1.Items.Count; x++)
                     {
-                        
-                        switch (x)
+                        if (checkedListBox1.GetItemChecked(x))
                         {
-                            case 0:
-                                CreateSerie(1, 2, "m_alpha", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
-                                break;
-                            case 1:
-                                CreateSerie(3, 5, "m+_alpha+", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
 
-                                break;
-                            case 2:
-                                CreateSerie(4, 6, "m-_alpha-", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
-                                break;
-                            case 3:
-                                CreateSerie(7, 8, "mprogn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
-                                break;
-                            case 4:
-                                CreateSerie(9, 11, "m+progn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
-                                break;
-                            case 5:
-                                CreateSerie(10, 12, "m-progn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
-                                break;
+                            switch (x)
+                            {
+                                case 0:
+                                    CreateSerie(1, 2, "m_alpha", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    break;
+                                case 1:
+                                    CreateSerie(3, 5, "m+_alpha+", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
 
+                                    break;
+                                case 2:
+                                    CreateSerie(4, 6, "m-_alpha-", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    break;
+                                case 3:
+                                    CreateSerie(7, 8, "mprogn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    break;
+                                case 4:
+                                    CreateSerie(9, 11, "m+progn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    break;
+                                case 5:
+                                    CreateSerie(10, 12, "m-progn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    break;
+
+                            }
                         }
                     }
+                }
+                catch (Exception ee1)
+                {
+                    MessageBox.Show("Мы не смогли построить один или несколько графиков. Попробуйте убрать галочки или проверить данные");
                 }
 
             }

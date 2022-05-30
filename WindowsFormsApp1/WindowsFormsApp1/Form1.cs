@@ -324,6 +324,37 @@ namespace WindowsFormsApp1
             }
         }
 
+        public void Decomp4(DataGridView datagrid_user, int[] column)
+        {
+            double max = 0;
+            double min = 99999999;
+            Console.WriteLine("caaal0 = {0}", Convert.ToString(column[0]));
+            for (int i = 0; i < column.Length; i++)
+
+            {
+                if (column[i] != 0)
+                {
+                    for (int j = 1; j < datagrid_user.Rows.Count - 2; j++)
+                    {
+                        double curr_val = Convert.ToDouble(datagrid_user.Rows[j].Cells[column[i]].Value);
+                        Console.WriteLine("curr_val = {0}", curr_val);
+                        if (curr_val < min && curr_val < max && column[i] != 0)
+                        {
+                            min = curr_val;
+                        }
+                        if (curr_val > max && curr_val > max)
+                        {
+                            max = curr_val;
+                        }
+                    }
+
+                }
+                chart6.ChartAreas.Clear();
+                chart6.ChartAreas.Add("0");
+                charts_init(chart6, min, max);
+            }
+        }
+
         private void button4_Click(object sender, EventArgs e)
         {
             __ss_Elabel__.Text = textBox1.Text + " , ";
@@ -721,10 +752,21 @@ namespace WindowsFormsApp1
         }
         private void checkedListBox3_SelectedIndexChanged(object sender, EventArgs e)
         {
+            int[] column = new int[dataGridView1.Columns.Count - 1];
+            int count = 0;
             chart6.Series.Clear();
-            Console.WriteLine("decomp4_min {0}", decomp4_min);
-            Console.WriteLine("decomp4_max {0}", decomp4_max);
-            charts_init(chart6, decomp4_min, decomp4_max);
+
+            for (int x = 1; x <= checkedListBox3.Items.Count; x++)
+            {
+                if (checkedListBox3.GetItemChecked(x - 1))
+                {
+                    count++;
+                    column[x - 1] = x;
+                }
+
+            }
+
+            Decomp4(dataGridView1, column);
             for (int x = 1; x <= checkedListBox3.Items.Count; x++)
             {
                 if (checkedListBox3.GetItemChecked(x - 1))

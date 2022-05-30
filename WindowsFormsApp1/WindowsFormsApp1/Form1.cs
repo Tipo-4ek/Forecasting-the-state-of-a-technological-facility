@@ -26,10 +26,10 @@ namespace WindowsFormsApp1
         ToolStripLabel ELabel;
         double par_E = -1;
         double par_A = -1;
-        double alpha_plus_max = 0;
+        //минимум максимум для чартов
+        double alpha_plus_max = 0; 
         double alpha_minus_min = 0;
         double m_minus_min = 0;
-        
         double m_plus_max = 0;
         double decomp4_min = 999999;
         double decomp4_max = -1;
@@ -42,26 +42,25 @@ namespace WindowsFormsApp1
             InitializeComponent();
             ELabel = new ToolStripLabel();
             ALabel = new ToolStripLabel();
-            
-
-
-
         }
         private void Form1_Load(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Maximized;
 
             this.Cursor = Cursors.Default;
-            SQLiteConnectionConn = new SQLiteConnection();
+            SQLiteConnectionConn = new SQLiteConnection(); //подсоединение к базе
             dTable = new DataTable();
             par_dtable = new DataTable();
+            //убираем вкладки с формы
             tabPage2.Parent = null;
             tabPage3.Parent = null;
             tabPage5.Parent = null;
             tabPage7.Parent = null;
+            //отключение кнопок
             button1.Enabled = false;
             button3.Enabled = false;
             button4.Enabled = false;
+            //ограничение ввода в комбобокс
             this.comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
             this.comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox2.Enabled = false;
@@ -74,7 +73,7 @@ namespace WindowsFormsApp1
                               "4) Чтобы увидеть координаты точек выбранного блока, нажмите на кнопку \"Применить\".";
         }
 
-        public Image ByteToImage(byte[] imageBytes)
+        public Image ByteToImage(byte[] imageBytes) //загрузка изображения //конвертация из байтов в изображение с помощью библиотеки битмап
         {
             // Convert byte[] to Image
             MemoryStream ms = new MemoryStream(imageBytes, 0, imageBytes.Length);
@@ -82,7 +81,7 @@ namespace WindowsFormsApp1
             Image image = new Bitmap(ms);
             return image;
         }
-        private bool OpenDBFile()
+        private bool OpenDBFile() //загрузка базы данных 
         {
 
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -90,7 +89,7 @@ namespace WindowsFormsApp1
             openFileDialog.Filter = "Текстовые файлы (*.sqlite)|*.sqlite| Все файлы (*.*)|*.*";
             if (openFileDialog.ShowDialog(this) == DialogResult.OK)
             {
-                SQLiteConn = new SQLiteConnection("Data Source =" + openFileDialog.FileName + ";Version = 3;");
+                SQLiteConn = new SQLiteConnection("Data Source =" + openFileDialog.FileName + ";Version = 3;"); //путь до файла
                 SQLiteConn.Open();
                 SQLiteCommand command = new SQLiteCommand();
                 command.Connection = SQLiteConn;
@@ -99,18 +98,19 @@ namespace WindowsFormsApp1
             else return false;
         }
 
-        private string SQL_ALLTable() { return "SELECT * FROM " + comboBox2.SelectedItem + " order by 1"; }
-        private string SQL_EATable1() { return "SELECT value FROM `parameters`"; }
+        private string SQL_ALLTable() { return "SELECT * FROM " + comboBox2.SelectedItem + " order by 1"; } //выбор таблицы(вытаскивание данных из таблицы)
+        
 
         private void ShowTable(string SQLQuery)
         {
             dTable.Clear();
             SQLiteDataAdapter adapter = new SQLiteDataAdapter(SQLQuery, SQLiteConn);
-            adapter.Fill(dTable);
+            adapter.Fill(dTable);//заполнение временной таблицы, в которую загружаются результаты выборки 
 
             dataGridView1.Columns.Clear();
             dataGridView1.Rows.Clear();
 
+            //заполнение столбцов
             for (int col = 0; col < dTable.Columns.Count; col++)
             {
                 string ColName = dTable.Columns[col].ColumnName;
@@ -118,6 +118,7 @@ namespace WindowsFormsApp1
                 dataGridView1.Columns[col].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
             }
 
+            //заполнение строк
             for (int row = 0; row < dTable.Rows.Count; row++)
             {
                 dataGridView1.Rows.Add(dTable.Rows[row].ItemArray);
@@ -133,30 +134,29 @@ namespace WindowsFormsApp1
             {
                 try {
                     string query = "SELECT data FROM `images` WHERE `id`= 2";
-                    SQLiteCommand cmd = new SQLiteCommand(query, SQLiteConn);
+                    SQLiteCommand cmd = new SQLiteCommand(query, SQLiteConn); //результат выборки
 
-                    SQLiteDataReader rdr = cmd.ExecuteReader();
+                    SQLiteDataReader rdr = cmd.ExecuteReader(); //извлечение в rdr результат выборки
                     while (rdr.Read())
                     {
-                        byte[] a = (System.Byte[])rdr[0];
+                        byte[] a = (System.Byte[])rdr[0]; //конвертация изображения
                         pictureBox1.Image = ByteToImage(a);
                     }
-                    pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-                    pictureBox1.Image = new Bitmap(pictureBox1.Image);
+                    pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage; //растровое изображение
+                    pictureBox1.Image = new Bitmap(pictureBox1.Image); //вывод изображения на экран
 
                     statusStrip1.Items.Add(ELabel);
                     statusStrip1.Items.Add(ALabel);
 
                     string pars = "SELECT * FROM `parameters`";
-                    SQLiteCommand command = new SQLiteCommand(pars, SQLiteConn);
+                    SQLiteCommand command = new SQLiteCommand(pars, SQLiteConn); //отправляем sql запрос
                     command.CommandText = "SELECT * FROM `parameters`";
                     DataTable data = new DataTable();
                     SQLiteDataAdapter adapter = new SQLiteDataAdapter(command);
-                    adapter.Fill(data);
+                    adapter.Fill(data); 
                     Console.WriteLine($"Прочитано {data.Rows.Count} записей из таблицы БД");
-                    foreach (DataRow row in data.Rows)
-                    {
-                        Console.WriteLine($"id = {row.Field<long>("id")} name = {row.Field<string>("name")} value = {row.Field<double>("value")}");
+                    foreach (DataRow row in data.Rows) //обход всех строчек из нашей выборки //вытаскиваем наши значения е и а
+                    {                        
                         if (row.Field<long>("id") == 1)
                         {
                             textBox1.Text = row.Field<double>("value").ToString();
@@ -177,7 +177,7 @@ namespace WindowsFormsApp1
                 {
                     MessageBox.Show("Ошибка при подключении к базе. \n\n\n" + Convert.ToString(except));
                 }
-                string SQLQuery = "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;";
+                string SQLQuery = "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;"; //вытаскиваем название таблиц для вывода в тестирование
                 SQLiteCommand command2 = new SQLiteCommand(SQLQuery, SQLiteConn);
                 SQLiteDataReader reader = command2.ExecuteReader();
                 comboBox2.Enabled = true;
@@ -207,7 +207,7 @@ namespace WindowsFormsApp1
 
         private void button1_Click(object sender, EventArgs e) // Добавление
         {
-            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US"); //кодировка
             Random rnd = new Random();
             string sql_query = "INSERT INTO "+comboBox2.SelectedItem + " VALUES (" + Convert.ToString(dataGridView1.Rows.Count - 1) + ", ";
             double val;
@@ -222,7 +222,7 @@ namespace WindowsFormsApp1
                         max = difference;
                     }
                 }
-                double difference1 = rnd.NextDouble() * (max - -max) + (-max);
+                double difference1 = rnd.NextDouble() * (max - -max) + (-max); //находим наибольшее число в промежутке от -макс до макс
                 val = Math.Round(Convert.ToDouble(dataGridView1.Rows[dataGridView1.Rows.Count - 2].Cells[i].Value) + difference1, 4);
                 sql_query += val;
                 if (i < dataGridView1.Columns.Count - 1)
@@ -232,8 +232,8 @@ namespace WindowsFormsApp1
                 
             }
 
-            sql_query = sql_query.Remove(sql_query.Length - 1) + ")";
-
+            sql_query = sql_query.Remove(sql_query.Length - 1) + ")"; //удаление пробела
+            //на выходе строка INSERT INTO VALUES (1,2,3,4)
             Console.WriteLine(sql_query);
 
             SQLiteCommand cmd = new SQLiteCommand(sql_query, SQLiteConn);
@@ -243,7 +243,7 @@ namespace WindowsFormsApp1
             ShowTable(SQL_ALLTable());
         }
 
-        public void charts_init(Chart inp_chart, double y_min, double y_max)
+        public void charts_init(Chart inp_chart, double y_min, double y_max) //присваивание макс и мин на графике для границ
         {
             inp_chart.ChartAreas[0].AxisY.Minimum = y_min;
             inp_chart.ChartAreas[0].AxisY.Maximum = y_max;
@@ -256,8 +256,7 @@ namespace WindowsFormsApp1
                 double x, y;
 
                 string Serie1 = inp_nameSerie;
-                //Console.WriteLine("------------------------------");
-                //Console.WriteLine(inp_nameSerie);
+            
 
                 inp_chartName.Series.Add(new Series(Serie1));
                 inp_chartName.Series[Serie1].ChartType = (System.Windows.Forms.DataVisualization.Charting.SeriesChartType)4;
@@ -285,24 +284,15 @@ namespace WindowsFormsApp1
 
                 for (int p = 0; p < inp_datagrid.Rows.Count - 2; p++)
                 {
-
-
                     x = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_x].Value);
                     if (isNeedXCut)
-                        x = x - x % 0.0001;
+                        x = x - x % 0.0001; //обрезание до 5 знака
                     y = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_y].Value) * koeff_umnozhenia;
-
-                    //Console.WriteLine("\n" + inp_nameSerie + " - " + x + " | " + y);
+                                        
                     inp_chartName.Series[Serie1].Points.AddXY(x, y);
                     inp_chartName.Series[Serie1].Points[p].Label = Convert.ToString(p);
-
-
                 }
-                //Console.WriteLine("------------------------------");
-                //inp_chartName.ChartAreas[0].AxisY.Minimum = y_min;
-                //inp_chartName.ChartAreas[0].AxisY.Maximum = y_max;
-                //inp_chartName.ChartAreas[0].AxisY.Minimum = 48;
-                //inp_chartName.ChartAreas[0].AxisY.Maximum = 49;
+                
             }
             catch (Exception exxx)
             {
@@ -353,9 +343,9 @@ namespace WindowsFormsApp1
         {
             if (comboBox2.SelectedIndex != -1)
             {
-                string Query = "SELECT * FROM " + comboBox2.SelectedItem;
+                string Query = "SELECT * FROM " + comboBox2.SelectedItem; //выбор новой таблицы
                 ShowTable(Query);
-                tabPage2.Parent = tabControl1;
+                tabPage2.Parent = tabControl1;//включение кнопок
                 tabPage3.Parent = tabControl1;
                 tabPage5.Parent = tabControl1;
                 button1.Enabled = true;
@@ -380,16 +370,14 @@ namespace WindowsFormsApp1
             dataGridView2.Columns.Clear();
             dataGridView2.Rows.Clear();
             
-            for (int i = 0; i <name.Length; i++)
+            for (int i = 0; i <name.Length; i++) //добавляем столбцы по name
             {
                 dataGridView2.Columns.Add(name[i], name[i]);
                 dataGridView2.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
             }
             for (int i = 0; i < dataGridView1.Rows.Count - 1; i++)
             {
-                dataGridView2.Rows.Add(dataGridView1.Rows[i].Cells[0].Value);
-
-       
+                dataGridView2.Rows.Add(dataGridView1.Rows[i].Cells[0].Value);       
             }
             dataGridView2.Rows.Add("Прогноз");
 
@@ -403,49 +391,32 @@ namespace WindowsFormsApp1
 
                     alfa += Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) * Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value);
                     alfa_plus += (Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) + par_E) * (Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) + par_E);
-                    //Console.WriteLine(Convert.ToString(Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) + par_E));
                     alfa_minus += (Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value) - par_E) * (Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) - par_E);
-
-                    /*                        Console.WriteLine(Convert.ToDouble(dataGridView1.Rows[0].Cells[j].Value));
-                                            Console.WriteLine(Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value));*/
-
                 }
                 if (i == 0)
                 {
-                    /*Console.WriteLine("Присвоили М первой = {0}. Альфы = 0 ", Math.Sqrt(M));*/
                     M_prev = M;
                     M_prev_plus = M_plus;
                     M_prev_minus = M_minus;
                     alfa = 0;
                     alfa_minus = 0;
                     alfa_plus = 0;
-
                 }
                 else
-                {
-                    //Console.WriteLine("М первая {0}", Math.Sqrt(M_prev));
-                    //Console.WriteLine("М {0}", Math.Sqrt(M));
-
+                {                
                     alfa = alfa / (Math.Sqrt(M_prev) * Math.Sqrt(M));
-                    /* Console.WriteLine("alpa_plus = {0}", alfa_plus);*/
-                    alfa_plus = alfa_plus / (Math.Sqrt(M_prev_plus) * Math.Sqrt(M_plus));
-                    /*double temp = (Math.Sqrt(M_prev_plus) * Math.Sqrt(M_plus));
-                    Console.WriteLine("Делим это на {0} = {1}",temp, alfa_plus);*/
-                    alfa_minus = alfa_minus / (Math.Sqrt(M_prev_minus) * Math.Sqrt(M_minus));
-                    // Console.WriteLine("Альфа поделили {0}", alfa_plus);                
+                    alfa_plus = alfa_plus / (Math.Sqrt(M_prev_plus) * Math.Sqrt(M_plus));                 
+                    alfa_minus = alfa_minus / (Math.Sqrt(M_prev_minus) * Math.Sqrt(M_minus));                               
                     alfa = Math.Acos(alfa)*3600;
-                    /* Console.WriteLine("Ща будем брать acos alfa ({0})", alfa_plus);*/
                     alfa_plus = Math.Acos(alfa_plus)*3600;
-                    /*  Console.WriteLine("Взяли acos = {0}", alfa_plus);*/
-                    alfa_minus = Math.Acos(alfa_minus)*3600;
-                    //Console.WriteLine("Альфа косинус {0}", alfa_plus);
+                    alfa_minus = Math.Acos(alfa_minus)*3600;                  
                 }
 
                 M = Math.Round(M,4);
                 M_plus = Math.Round(M_plus, 4);
                 M_minus = Math.Round(M_minus, 4);
                
-                dataGridView2.Rows[i].Cells[1].Value = Math.Round(Math.Sqrt(M),4);
+                dataGridView2.Rows[i].Cells[1 ].Value = Math.Round(Math.Sqrt(M),4);
                 dataGridView2.Rows[i].Cells[3].Value = Math.Round(Math.Sqrt(M_plus), 4);
                 dataGridView2.Rows[i].Cells[4].Value = Math.Round(Math.Sqrt(M_minus), 4);
                 dataGridView2.Rows[i].Cells[2].Value = alfa;
@@ -480,6 +451,7 @@ namespace WindowsFormsApp1
                 alfa_minus = 0;
 
             }
+
             for (int i = 0; i < dataGridView2.Rows.Count - 2; i++) //M(прогн) и alfa(прогн)
             {
                 if (i == 0)
@@ -613,21 +585,22 @@ namespace WindowsFormsApp1
             chart3.Series.Clear();
             chart5.Series.Clear();
 
-            for (int x = 0; x < checkedListBox1.Items.Count; x++)
+            for (int x = 0; x < checkedListBox1.Items.Count; x++) //убирает галочки на чеклистбокс
             {
                 checkedListBox1.SetItemChecked(x, false);
             }
-            checkedListBox1.SelectedItem = 1;
+            checkedListBox1.SelectedItem = 1; //выделяет первый элемент в листбоксе 
             Decomposition2();
             }
 
 
         private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            try
+            try 
             {
+                //покой(мин=макс)
                 if (alpha_minus_min != alpha_plus_max)
-                    charts_init(chart1, alpha_minus_min, alpha_plus_max);
+                    charts_init(chart1, alpha_minus_min, alpha_plus_max); //границы на графике
                 else
                     charts_init(chart1, -0.00001, 0.00001);
                 if (m_minus_min != m_plus_max)
@@ -647,15 +620,8 @@ namespace WindowsFormsApp1
             CreateSerie(0, 4, "m-(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
             if (checkedListBox1.CheckedItems.Count != 0)
             {
-                // If so, loop through all checked items and print results.
-                Console.WriteLine("alpha_minus_min {0}", alpha_minus_min);
-                Console.WriteLine("alpha_plus_max {0}", alpha_plus_max);
-                Console.WriteLine("m_minus_min {0}", m_minus_min);
-                Console.WriteLine("m_minus_max {0}", m_plus_max);
-                 
-/*                 CreateSerie(0, 1, "t_m", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);
-                 CreateSerie(0, 3, "t_m+", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);
-                 CreateSerie(0, 4, "t_m-", chart3, false, 1, m_minus_min, m_plus_max, dataGridView2);*/
+                
+
                try {
                     for (int x = 0; x < checkedListBox1.Items.Count; x++)
                     {
@@ -712,21 +678,20 @@ namespace WindowsFormsApp1
         private void Decomposition2()
         {
             string query = "SELECT data FROM `images` WHERE `id`= 2";
-            SQLiteCommand cmd = new SQLiteCommand(query, SQLiteConn);
-
-            SQLiteDataReader rdr = cmd.ExecuteReader();
+            SQLiteCommand cmd = new SQLiteCommand(query, SQLiteConn); //результат выборки
+            SQLiteDataReader rdr = cmd.ExecuteReader(); //извлечение в rdr результат выборки
             while (rdr.Read())
             {
-                byte[] a = (System.Byte[])rdr[0];
+                byte[] a = (System.Byte[])rdr[0]; //конвертация изображения 
                 pictureBox1.Image = ByteToImage(a);
             }
             pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox2.Image = new Bitmap(pictureBox1.Image);
+            pictureBox2.Image = new Bitmap(pictureBox1.Image); //вывод изображения на экран
             
 
 
         }
-        //Стринга, чтобы парсить предыдущие точки, которые выбрали в другом блоке
+        //Строка, чтобы обрабатывать предыдущие точки, которые выбрали в другом блоке
         string last_points_str = "";
 
 
@@ -741,7 +706,7 @@ namespace WindowsFormsApp1
             string[] name_blocks = { "Блок A", "Блок B", "Блок C", "Блок D", "Блок E", "Блок F", "Блок G", "Блок H", "Блок K", "Блок L" };
             try
             {
-                kol = Convert.ToDouble(textBox3.Text);
+                kol = Convert.ToDouble(textBox3.Text); //кол-во блоков
                 
                 if (kol <= name_blocks.Length)
                 {
@@ -764,23 +729,17 @@ namespace WindowsFormsApp1
                 MessageBox.Show("На ввод принимаются только числа.");
             }
 
-
-            /*          double kol_dotCount = dataGridView1.Columns.Count-1;
-                        double kol_dotblockCount = Math.Truncate(kol_dotCount/kol);
-                        Console.WriteLine(kol_dotCount);
-                        Console.WriteLine(kol_dotblockCount);*/
-
         }
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            listBox1.Items.Clear();
+            listBox1.Items.Clear(); //если выбрали другой блок, очищаем листбокс
             listBox2.Items.Clear();
             if (comboBox1.SelectedIndex != -1)
             {
                 double metka = 0;
                 double kol = Convert.ToDouble(textBox3.Text);
                 double kol_dotCount = dataGridView1.Columns.Count - 1;
-                double kol_dotblockCount = Math.Truncate(kol_dotCount / kol);
+                double kol_dotblockCount = Math.Truncate(kol_dotCount / kol); //целочисленное деление 
                 Console.WriteLine(kol_dotCount);
                 Console.WriteLine(kol_dotblockCount);
                 for (int i = 1; i <= kol_dotblockCount; i++)
@@ -814,9 +773,6 @@ namespace WindowsFormsApp1
 
         private void button7_Click(object sender, EventArgs e)
         {
-            //Console.WriteLine(last_points_str.Split(','));
-            
-
 
             //Получаем в формате "Блок A"
             string cur_block = Convert.ToString(comboBox1.SelectedItem);
@@ -849,6 +805,7 @@ namespace WindowsFormsApp1
             //"A-1,A-2,B-3,B-4,A-5"
             //[A-1] [A-2] [B-3] 
             //max count of blocks has hand-validation
+            //проверка на совпадение количества точек
             int[] array = new int[10];
             
             for (int iter = 0; iter<elem_count; iter++)
@@ -886,12 +843,9 @@ namespace WindowsFormsApp1
                         case "J":
                             array[9] = array[9] + 1;
                             break;
-
-
-                    
-
                 }
                 bool flag = true;
+                //флаг нужен для того, чтобы проверять совпадает кол-во точек или нет
                 int i = 0;
                 //"3 3 0"
                 while (flag && i<array.Length-1)
@@ -899,10 +853,10 @@ namespace WindowsFormsApp1
 
                     if ((array[i] != 0 && array[i + 1] != 0) && (array[i] != array[i + 1]))
                         flag = false;
-
-                    
+       
                     i++;
                 }
+                //если флаг true, то кол-во точек на блоках совпадает, иначе нет
                 if (flag) {
                     label9.Text = "Количество точек на блоках совпадает. Все ОК";
                     
@@ -945,8 +899,6 @@ namespace WindowsFormsApp1
             try
             {
                 double temp = 0;
-                
-               
 
                 //Получаем в формате "Блок A"
                 string cur_block = Convert.ToString(comboBox1.SelectedItem);
@@ -1084,16 +1036,11 @@ namespace WindowsFormsApp1
 
                     alfa += Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) * Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value);
                     alfa_plus += (Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) + par_E) * (Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) + par_E);
-                    //Console.WriteLine(Convert.ToString(Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) + par_E));
                     alfa_minus += (Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value) - par_E) * (Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value) - par_E);
-
-                    /*                        Console.WriteLine(Convert.ToDouble(dataGridView3.Rows[0].Cells[j].Value));
-                                            Console.WriteLine(Convert.ToDouble(dataGridView3.Rows[i].Cells[j].Value));*/
 
                 }
                 if (i == 0)
                 {
-                    /*Console.WriteLine("Присвоили М первой = {0}. Альфы = 0 ", Math.Sqrt(M));*/
                     M_prev = M;
                     M_prev_plus = M_plus;
                     M_prev_minus = M_minus;
@@ -1104,22 +1051,12 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    //Console.WriteLine("М первая {0}", Math.Sqrt(M_prev));
-                    //Console.WriteLine("М {0}", Math.Sqrt(M));
-
                     alfa = alfa / (Math.Sqrt(M_prev) * Math.Sqrt(M));
-                    /* Console.WriteLine("alpa_plus = {0}", alfa_plus);*/
                     alfa_plus = alfa_plus / (Math.Sqrt(M_prev_plus) * Math.Sqrt(M_plus));
-                    /*double temp = (Math.Sqrt(M_prev_plus) * Math.Sqrt(M_plus));
-                    Console.WriteLine("Делим это на {0} = {1}",temp, alfa_plus);*/
-                    alfa_minus = alfa_minus / (Math.Sqrt(M_prev_minus) * Math.Sqrt(M_minus));
-                    // Console.WriteLine("Альфа поделили {0}", alfa_plus);                
+                    alfa_minus = alfa_minus / (Math.Sqrt(M_prev_minus) * Math.Sqrt(M_minus));         
                     alfa = Math.Acos(alfa)*3600;
-                    /* Console.WriteLine("Ща будем брать acos alfa ({0})", alfa_plus);*/
                     alfa_plus = Math.Acos(alfa_plus)*3600;
-                    /*  Console.WriteLine("Взяли acos = {0}", alfa_plus);*/
                     alfa_minus = Math.Acos(alfa_minus)*3600;
-                    //Console.WriteLine("Альфа косинус {0}", alfa_plus);
                 }
 
 
@@ -1302,8 +1239,8 @@ namespace WindowsFormsApp1
         {
             chart3.Series.Clear();
             chart5.Series.Clear();
-            charts_init(chart3, alpha_minus_min_dec2, alpha_plus_max_dec2); //Incorrect
-            charts_init(chart5, m_minus_min_dec2, m_plus_max_dec2); //Incorrect
+            charts_init(chart3, alpha_minus_min_dec2, alpha_plus_max_dec2); 
+            charts_init(chart5, m_minus_min_dec2, m_plus_max_dec2); 
 
 
             for (int x = 0; x < checkedListBox2.Items.Count; x++)
@@ -1332,9 +1269,9 @@ namespace WindowsFormsApp1
                             CreateSerie(10, 12, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
                             break;
                         case 6:
-                            CreateSerie(0, 1, checkedListBox2.Items[x].ToString(), chart5, true, 1, m_minus_min_dec2, m_plus_max_dec2, dataGridView4);
-                            CreateSerie(0, 3, checkedListBox2.Items[x].ToString() + "_", chart5, true, 1, m_minus_min_dec2,m_plus_max_dec2, dataGridView4);
-                            CreateSerie(0, 4, checkedListBox2.Items[x].ToString() + "__", chart5, true, 1, m_minus_min_dec2, m_plus_max_dec2, dataGridView4);
+                            CreateSerie(0, 1,"m_t", chart5, true, 1, m_minus_min_dec2, m_plus_max_dec2, dataGridView4);
+                            CreateSerie(0, 3, "m+_t", chart5, true, 1, m_minus_min_dec2,m_plus_max_dec2, dataGridView4);
+                            CreateSerie(0, 4, "m-_t", chart5, true, 1, m_minus_min_dec2, m_plus_max_dec2, dataGridView4);
                             break;
                         
 

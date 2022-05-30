@@ -530,7 +530,7 @@ namespace WindowsFormsApp1
             this.button7.Text = "->";
             this.button7.UseVisualStyleBackColor = true;
             this.button7.Click += new System.EventHandler(this.button7_Click);
-            this.button7.Enter += new System.EventHandler(this.button7_Click);
+           // this.button7.Enter += new System.EventHandler(this.button7_Click);
             // 
             // button6
             // 
@@ -713,14 +713,14 @@ namespace WindowsFormsApp1
             this.dataGridView4.BackgroundColor = System.Drawing.Color.DimGray;
             this.dataGridView4.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView4.Cursor = System.Windows.Forms.Cursors.Default;
-            this.dataGridView4.GridColor = System.Drawing.Color.Maroon;
-            this.dataGridView4.Location = new System.Drawing.Point(2, 353);
+            this.dataGridView4.GridColor = System.Drawing.Color.White;
+            this.dataGridView4.Location = new System.Drawing.Point(2, 473);
             this.dataGridView4.Margin = new System.Windows.Forms.Padding(2);
             this.dataGridView4.Name = "dataGridView4";
             this.dataGridView4.ReadOnly = true;
             this.dataGridView4.RowHeadersWidth = 51;
             this.dataGridView4.RowTemplate.Height = 24;
-            this.dataGridView4.Size = new System.Drawing.Size(701, 297);
+            this.dataGridView4.Size = new System.Drawing.Size(1300, 270);
             this.dataGridView4.TabIndex = 4;
             // 
             // chart5
@@ -741,7 +741,7 @@ namespace WindowsFormsApp1
             legend8.Name = "Legend1";
             legend8.ShadowColor = System.Drawing.Color.DimGray;
             this.chart5.Legends.Add(legend8);
-            this.chart5.Location = new System.Drawing.Point(708, 204);
+            this.chart5.Location = new System.Drawing.Point(708, 16);
             this.chart5.Margin = new System.Windows.Forms.Padding(2);
             this.chart5.Name = "chart5";
             series3.ChartArea = "ChartArea1";
@@ -779,7 +779,7 @@ namespace WindowsFormsApp1
             series4.Legend = "Legend1";
             series4.Name = "Series1";
             this.chart3.Series.Add(series4);
-            this.chart3.Size = new System.Drawing.Size(476, 310);
+            this.chart3.Size = new System.Drawing.Size(476, 490);
             this.chart3.TabIndex = 1;
             this.chart3.Text = "chart3";
             // 
@@ -787,6 +787,7 @@ namespace WindowsFormsApp1
             // 
             this.checkedListBox2.BackColor = System.Drawing.Color.DimGray;
             this.checkedListBox2.CheckOnClick = true;
+            
             this.checkedListBox2.Cursor = System.Windows.Forms.Cursors.Default;
             this.checkedListBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.checkedListBox2.ForeColor = System.Drawing.Color.White;
@@ -805,6 +806,7 @@ namespace WindowsFormsApp1
             this.checkedListBox2.Size = new System.Drawing.Size(164, 274);
             this.checkedListBox2.TabIndex = 0;
             this.checkedListBox2.SelectedIndexChanged += new System.EventHandler(this.checkedListBox2_SelectedIndexChanged);
+            this.checkedListBox2.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox3_ItemCheck);
             // 
             // tabPage5
             // 

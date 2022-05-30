@@ -860,7 +860,6 @@ namespace WindowsFormsApp1
                 last_points_str += cur_block.Split(' ')[1] + "-" + listBox1.SelectedItem;
                 Console.WriteLine($"last_points_str - '{last_points_str}'");
 
-
                 listBox1.Items.Remove(listBox1.SelectedItem);
                 sort_listbox2();
             }
@@ -1294,11 +1293,11 @@ namespace WindowsFormsApp1
                             CreateSerie(10, 12, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
                             break;
                         case 6:
-                            CreateSerie(0, 1, checkedListBox2.Items[x].ToString(), chart5,dataGridView4);
-                            CreateSerie(0, 3, checkedListBox2.Items[x].ToString() + "_", chart5, dataGridView4);
-                            CreateSerie(0, 4, checkedListBox2.Items[x].ToString() + "__", chart5, dataGridView4);
+                            CreateSerie(0, 1, "M (t)", chart5, dataGridView4);
+                            CreateSerie(0, 3, "M+ (t)", chart5, dataGridView4);
+                            CreateSerie(0, 4, "M- (t)", chart5, dataGridView4);
                             break;
-                        
+
 
                     }
                 }
@@ -1328,6 +1327,51 @@ namespace WindowsFormsApp1
         private void pictureBox1_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void checkedListBox2_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            chart3.Series.Clear();
+            chart5.Series.Clear();
+            charts_init(chart3, __alpha_minus_low___dec2, alpha_plus_max_dec2); //Incorrect
+            charts_init(chart5, __m_minus_low___dec2, __m_plus_high___dec2); //Incorrect
+
+
+            for (int x = 0; x < checkedListBox2.Items.Count; x++)
+            {
+                if (checkedListBox2.GetItemChecked(x))
+                {
+
+                    switch (x)
+                    {
+                        case 0:
+                            CreateSerie(1, 2, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
+                            break;
+                        case 1:
+                            CreateSerie(3, 5, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
+                            break;
+                        case 2:
+                            CreateSerie(4, 6, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
+                            break;
+                        case 3:
+                            CreateSerie(7, 8, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
+                            break;
+                        case 4:
+                            CreateSerie(9, 11, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
+                            break;
+                        case 5:
+                            CreateSerie(10, 12, checkedListBox2.Items[x].ToString(), chart3, dataGridView4);
+                            break;
+                        case 6:
+                            CreateSerie(0, 1, "M (t)", chart5, dataGridView4);
+                            CreateSerie(0, 3, "M+ (t)", chart5, dataGridView4);
+                            CreateSerie(0, 4, "M- (t)", chart5, dataGridView4);
+                            break;
+
+
+                    }
+                }
+            }
         }
     }
 }

@@ -18,7 +18,7 @@ namespace WindowsFormsApp1
     {
         private SQLiteConnection SQLiteConn;
 
-        public SQLiteConnection SQLiteConnectionConn { get; private set; }
+        public SQLiteConnection SQLiteConnectionConn { get; private set; } //подключение sql
 
         private DataTable dTable;
         private DataTable par_dtable;
@@ -42,6 +42,7 @@ namespace WindowsFormsApp1
             InitializeComponent();
             ELabel = new ToolStripLabel();
             ALabel = new ToolStripLabel();
+            label9.Text = "Количество выбранных точек на блоках должно совпадать";
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -73,7 +74,7 @@ namespace WindowsFormsApp1
                               "4) Чтобы увидеть координаты точек выбранного блока, нажмите на кнопку \"Применить\".";
         }
 
-        public Image ByteToImage(byte[] imageBytes) //загрузка изображения //конвертация из байтов в изображение с помощью библиотеки битмап
+        public Image ByteToImage(byte[] imageBytes) //загрузка изображения //конвертация из набора байтов в изображение с помощью библиотеки битмап
         {
             // Convert byte[] to Image
             MemoryStream ms = new MemoryStream(imageBytes, 0, imageBytes.Length);
@@ -177,7 +178,7 @@ namespace WindowsFormsApp1
                 {
                     MessageBox.Show("Ошибка при подключении к базе. \n\n\n" + Convert.ToString(except));
                 }
-                string SQLQuery = "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;"; //вытаскиваем название таблиц для вывода в тестирование
+                string SQLQuery = "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;"; //вытаскиваем название таблиц в комбобокс  для вывода тестирования
                 SQLiteCommand command2 = new SQLiteCommand(SQLQuery, SQLiteConn);
                 SQLiteDataReader reader = command2.ExecuteReader();
                 comboBox2.Enabled = true;
@@ -199,7 +200,7 @@ namespace WindowsFormsApp1
             string sql_query = "DELETE FROM " + comboBox2.SelectedItem + " WHERE `Эпоха` = " + Convert.ToString(dataGridView1.Rows.Count - 2);
             Console.WriteLine(sql_query);
             SQLiteCommand cmd = new SQLiteCommand(sql_query, SQLiteConn);
-            SQLiteDataReader rdr = cmd.ExecuteReader();
+            SQLiteDataReader rdr = cmd.ExecuteReader(); //извлечение данных из нашего sql запроса
             dataGridView1.Columns.Clear();
             dataGridView1.Rows.Clear();
             ShowTable(SQL_ALLTable());
@@ -207,7 +208,7 @@ namespace WindowsFormsApp1
 
         private void button1_Click(object sender, EventArgs e) // Добавление
         {
-            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US"); //кодировка
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US"); //кодировка терминала
             Random rnd = new Random();
             string sql_query = "INSERT INTO "+comboBox2.SelectedItem + " VALUES (" + Convert.ToString(dataGridView1.Rows.Count - 1) + ", ";
             double val;
@@ -282,14 +283,13 @@ namespace WindowsFormsApp1
                     inp_chartName.ChartAreas[0].AxisY.Title = "H";
                 }
 
-                for (int p = 0; p < inp_datagrid.Rows.Count - 2; p++)
+                for (int p = 0; p < inp_datagrid.Rows.Count - 2; p++) //занос х и у
                 {
                     x = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_x].Value);
-                    if (isNeedXCut)
-                        x = x - x % 0.0001; //обрезание до 5 знака
                     y = Convert.ToDouble(inp_datagrid.Rows[p].Cells[cells_y].Value) * koeff_umnozhenia;
-                                        
-                    inp_chartName.Series[Serie1].Points.AddXY(x, y);
+                    
+                    //добавление и подпись точек на графике
+                    inp_chartName.Series[Serie1].Points.AddXY(x, y); 
                     inp_chartName.Series[Serie1].Points[p].Label = Convert.ToString(p);
                 }
                 
@@ -300,7 +300,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void button4_Click(object sender, EventArgs e) //сохранение данных при изменении е и а
         {
             ELabel.Text = textBox1.Text + " , ";
             ALabel.Text = textBox2.Text;
@@ -370,7 +370,7 @@ namespace WindowsFormsApp1
             dataGridView2.Columns.Clear();
             dataGridView2.Rows.Clear();
             
-            for (int i = 0; i <name.Length; i++) //добавляем столбцы по name
+            for (int i = 0; i <name.Length; i++) //добавляем столбцы 
             {
                 dataGridView2.Columns.Add(name[i], name[i]);
                 dataGridView2.Columns[i].AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
@@ -416,7 +416,7 @@ namespace WindowsFormsApp1
                 M_plus = Math.Round(M_plus, 4);
                 M_minus = Math.Round(M_minus, 4);
                
-                dataGridView2.Rows[i].Cells[1 ].Value = Math.Round(Math.Sqrt(M),4);
+                dataGridView2.Rows[i].Cells[1].Value = Math.Round(Math.Sqrt(M),4);
                 dataGridView2.Rows[i].Cells[3].Value = Math.Round(Math.Sqrt(M_plus), 4);
                 dataGridView2.Rows[i].Cells[4].Value = Math.Round(Math.Sqrt(M_minus), 4);
                 dataGridView2.Rows[i].Cells[2].Value = alfa;
@@ -548,7 +548,7 @@ namespace WindowsFormsApp1
                 R = 0;
 
             }
-
+             //прогнозы
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[7].Value = par_A * (sum_M_progn / (dataGridView2.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[7].Value);
             Console.WriteLine("Среднее знач M прогн {0}", sum_M_progn / (dataGridView2.Rows.Count - 2));
             Console.WriteLine("Последнее значение {0}", Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[7].Value));
@@ -759,6 +759,7 @@ namespace WindowsFormsApp1
                 {
                     for (int i = 0; i < elem_count; i++)
                     {
+                        //А-1/ Блок А, проверяем условие А=А, если совпадают, то выполняется условие
                         if (blocks_n_points[i].Split('-')[0] == Convert.ToString(comboBox1.SelectedItem).Split(' ')[1])
                         {
                             listBox1.Items.Remove(Convert.ToDouble(blocks_n_points[i].Split('-')[1]));
@@ -771,7 +772,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void button7_Click(object sender, EventArgs e)
+        private void button7_Click(object sender, EventArgs e) //перемещение точек из листбокс1 в листобкс2
         {
 
             //Получаем в формате "Блок A"
@@ -780,7 +781,7 @@ namespace WindowsFormsApp1
             try
             {
                 listBox2.Items.Add(listBox1.SelectedItem);
-                if (last_points_str != "")
+                if (last_points_str != "") //если строка не пустая, то добавляем запятую
                     last_points_str += ",";
                 //Формируем строку "A-1"
                 last_points_str += cur_block.Split(' ')[1] + "-" + listBox1.SelectedItem;
@@ -801,73 +802,14 @@ namespace WindowsFormsApp1
                 if (c == ',') elem_count++;
             //Теряем одну точку из-за того, что последний символ != ,
             elem_count += 1;
-            int block_a = 0, block_b = 0, block_c = 0, block_d = 0, block_e = 0, block_f = 0, block_g = 0, block_h = 0, block_i = 0, block_j = 0;
             //"A-1,A-2,B-3,B-4,A-5"
             //[A-1] [A-2] [B-3] 
             //max count of blocks has hand-validation
             //проверка на совпадение количества точек
-            int[] array = new int[10];
-            
-            for (int iter = 0; iter<elem_count; iter++)
-            {
-              
-                    switch (blocks_n_points[iter].Split('-')[0])
-                    {
-                        case "A":
-                            array[0] = array[0] + 1;
-                            break;
-                        case "B":
-                            array[1] = array[1] + 1;
-                            break;
-                        case "C":
-                            array[2] = array[2] + 1;
-                            break;
-                        case "D":
-                            array[3] = array[3] + 1;
-                            break;
-                        case "E":
-                            array[4] = array[4] + 1;
-                            break;
-                        case "F":
-                            array[5] = array[5] + 1;
-                            break;
-                        case "G":
-                            array[6] = array[6] + 1;
-                            break;
-                        case "H":
-                            array[7] = array[7] + 1;
-                            break;
-                        case "I":
-                            array[8] = array[8] + 1;
-                            break;
-                        case "J":
-                            array[9] = array[9] + 1;
-                            break;
-                }
-                bool flag = true;
-                //флаг нужен для того, чтобы проверять совпадает кол-во точек или нет
-                int i = 0;
-                //"3 3 0"
-                while (flag && i<array.Length-1)
-                {
-
-                    if ((array[i] != 0 && array[i + 1] != 0) && (array[i] != array[i + 1]))
-                        flag = false;
-       
-                    i++;
-                }
-                //если флаг true, то кол-во точек на блоках совпадает, иначе нет
-                if (flag) {
-                    label9.Text = "Количество точек на блоках совпадает. Все ОК";
+           
                     
-                }
-                else
-                    label9.Text = "Ошибка. Количество точек на блоках НЕ совпадает.";
                 
-            }
-            Console.WriteLine("array[0] = {0}", array[0]);
-
-
+           
         }
 
         private void sort_listbox2()
@@ -894,7 +836,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void button8_Click(object sender, EventArgs e)
+        private void button8_Click(object sender, EventArgs e)//возвращение точек из листбокс2 в листбокс1
         {
             try
             {
@@ -950,11 +892,11 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void button5_Click(object sender, EventArgs e)
+        private void button5_Click(object sender, EventArgs e) //кнопка Прменить
         {
             if (listBox2.Items.Count > 1)
             {
-                tabPage7.Parent = tabControl2;
+                tabPage7.Parent = tabControl2;//включение вкладки
                 dataGridView3.Columns.Clear();
                 dataGridView3.Rows.Clear();
                 dataGridView3.Columns.Add("Эпоха", "Эпоха");
@@ -986,7 +928,7 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)//вычисляем мин и макс для графика
         {
             if (tabControl1.SelectedTab == tabControl1.TabPages["tabPage5"])
             {
@@ -1005,7 +947,7 @@ namespace WindowsFormsApp1
                 }
             }
         }
-        private void tabControl2_MouseClick(object sender, MouseEventArgs e)
+        private void tabControl2_MouseClick(object sender, MouseEventArgs e)//расчет данных для 2 декомп
         {
             string[] name = { "Эпоха", "M", "alfa секунды", "M+", "M-", "alfa+ секунды", "alfa- секунды", "M(прогн)", "alfa(прогн) секунды", "M+(прогн)", "M-(прогн)", "alfa+(прогн) секунды", "alfa-(прогн) секунды", "L", "R", "Устойчивость" };
             double M = 0, M_plus = 0, M_minus = 0, alfa = 0, alfa_plus = 0, alfa_minus = 0, M_prev = 0, M_prev_plus = 0, M_prev_minus = 0, M_progn = 0, M_plus_progn = 0, M_minus_progn = 0, alfa_progn = 0, alfa_plus_progn = 0, alfa_minus_progn = 0, sum_M = 0, sum_M_plus = 0, sum_M_minus = 0, M_progn_prev = 0, alfa_progn_prev = 0, sum_alfa = 0, sum_alfa_plus = 0, sum_alfa_minus = 0, M_progn_prev_plus = 0, M_progn_prev_minus = 0, alfa_progn_prev_plus = 0, alfa_progn_prev_minus = 0, L = 0, M_null = 0, R = 0, sum_M_progn = 0, sum_Mplus_progn = 0, sum_Mminus_progn = 0, sum_alfa_progn = 0, sum_alfaplus_progn = 0, sum_alfaminus_progn = 0;
@@ -1225,7 +1167,7 @@ namespace WindowsFormsApp1
 
         }
 
-        private void tabControl1_TabIndexChanged(object sender, EventArgs e)
+        private void tabControl1_TabIndexChanged(object sender, EventArgs e)//заполнение листбокс в 4 декомп
         {
             checkedListBox3.Items.Clear();
             for (int i = 1; i < dataGridView1.Columns.Count; i++)
@@ -1235,7 +1177,7 @@ namespace WindowsFormsApp1
             Console.WriteLine("Запихнули checkedListBox3");
         }
 
-        private void checkedListBox2_SelectedIndexChanged(object sender, EventArgs e)
+        private void checkedListBox2_SelectedIndexChanged(object sender, EventArgs e) //расчеты во второй декомпозиции
         {
             chart3.Series.Clear();
             chart5.Series.Clear();
@@ -1292,12 +1234,136 @@ namespace WindowsFormsApp1
 
         private void checkedListBox3_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-
+            chart6.Series.Clear();
+            Console.WriteLine("decomp4_min {0}", decomp4_min);
+            Console.WriteLine("decomp4_max {0}", decomp4_max);
+            charts_init(chart6, decomp4_min, decomp4_max);
+            for (int x = 1; x <= checkedListBox3.Items.Count; x++)
+            {
+                if (checkedListBox3.GetItemChecked(x - 1))
+                {
+                    CreateSerie(0, x, Convert.ToString(x), chart6, true, 1, alpha_minus_min, alpha_plus_max, dataGridView1);
+                }
+            }
         }
 
         private void tabPage6_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void checkedListBox1_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            try
+            {
+                //покой(мин=макс)
+                if (alpha_minus_min != alpha_plus_max)
+                    charts_init(chart1, alpha_minus_min, alpha_plus_max); //границы на графике
+                else
+                    charts_init(chart1, -0.00001, 0.00001);
+                if (m_minus_min != m_plus_max)
+                    charts_init(chart2, m_minus_min, m_plus_max);
+            }
+            catch (Exception ei)
+            {
+                MessageBox.Show("К сожалению, мы не смогли посчитать min/max для графиков. Проверьте данные");
+            }
+
+
+            chart1.Series.Clear();
+            chart2.Series.Clear();
+            chart3.Series.Clear();
+            CreateSerie(0, 1, "m(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
+            CreateSerie(0, 3, "m+(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
+            CreateSerie(0, 4, "m-(t)", chart2, false, 1, m_minus_min, m_plus_max, dataGridView2);
+            if (checkedListBox1.CheckedItems.Count != 0)
+            {
+
+
+                try
+                {
+                    for (int x = 0; x < checkedListBox1.Items.Count; x++)
+                    {
+                        if (checkedListBox1.GetItemChecked(x))
+                        {
+
+                            switch (x)
+                            {
+                                case 0:
+                                    CreateSerie(1, 2, "m_alpha", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    break;
+                                case 1:
+                                    CreateSerie(3, 5, "m+_alpha+", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+
+                                    break;
+                                case 2:
+                                    CreateSerie(4, 6, "m-_alpha-", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    break;
+                                case 3:
+                                    CreateSerie(7, 8, "mprogn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    break;
+                                case 4:
+                                    CreateSerie(9, 11, "m+progn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    break;
+                                case 5:
+                                    CreateSerie(10, 12, "m-progn_alphaprogn", chart1, true, 1, alpha_minus_min, alpha_plus_max, dataGridView2);
+                                    break;
+
+                            }
+                        }
+                    }
+                }
+                catch (Exception ee1)
+                {
+                    MessageBox.Show("Мы не смогли построить один или несколько графиков. Попробуйте убрать галочки или проверить данные");
+                }
+
+            }
+        }
+
+        private void checkedListBox2_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            chart3.Series.Clear();
+            chart5.Series.Clear();
+            charts_init(chart3, alpha_minus_min_dec2, alpha_plus_max_dec2);
+            charts_init(chart5, m_minus_min_dec2, m_plus_max_dec2);
+
+
+            for (int x = 0; x < checkedListBox2.Items.Count; x++)
+            {
+                if (checkedListBox2.GetItemChecked(x))
+                {
+
+                    switch (x)
+                    {
+                        case 0:
+                            CreateSerie(1, 2, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min_dec2, alpha_plus_max, dataGridView4);
+                            break;
+                        case 1:
+                            CreateSerie(3, 5, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min_dec2, alpha_plus_max, dataGridView4);
+                            break;
+                        case 2:
+                            CreateSerie(4, 6, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min_dec2, alpha_plus_max, dataGridView4);
+                            break;
+                        case 3:
+                            CreateSerie(7, 8, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            break;
+                        case 4:
+                            CreateSerie(9, 11, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            break;
+                        case 5:
+                            CreateSerie(10, 12, checkedListBox2.Items[x].ToString(), chart3, true, 1, alpha_minus_min, alpha_plus_max, dataGridView4);
+                            break;
+                        case 6:
+                            CreateSerie(0, 1, "m_t", chart5, true, 1, m_minus_min_dec2, m_plus_max_dec2, dataGridView4);
+                            CreateSerie(0, 3, "m+_t", chart5, true, 1, m_minus_min_dec2, m_plus_max_dec2, dataGridView4);
+                            CreateSerie(0, 4, "m-_t", chart5, true, 1, m_minus_min_dec2, m_plus_max_dec2, dataGridView4);
+                            break;
+
+
+                    }
+                }
+            }
         }
     }
 }

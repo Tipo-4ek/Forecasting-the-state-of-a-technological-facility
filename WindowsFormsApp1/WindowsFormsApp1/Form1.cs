@@ -354,6 +354,36 @@ namespace WindowsFormsApp1
             }
         }
 
+        public void Decomp4(DataGridView datagrid_user, int[] column)
+        {
+            double max = 0;
+            double min = 99999999;
+            Console.WriteLine("caaal0 = {0}", Convert.ToString(column[0]));
+            for (int i = 0; i < column.Length; i++)
+
+            {
+                if (column[i] != 0)
+                {
+                    for (int j = 1; j < datagrid_user.Rows.Count - 2; j++)
+                    {
+                        double curr_val = Convert.ToDouble(datagrid_user.Rows[j].Cells[column[i]].Value);
+                        Console.WriteLine("curr_val = {0}", curr_val);
+                        if (curr_val < min && curr_val < max && column[i] != 0)
+                        {
+                            min = curr_val;
+                        }
+                        if (curr_val > max && curr_val > max)
+                        {
+                            max = curr_val;
+                        }
+                    }
+
+                }
+                chart6.ChartAreas.Clear();
+                chart6.ChartAreas.Add("0");
+                charts_init(chart6, min, max);
+            }
+        }
         public void Decomposition1()
         {
            
@@ -524,10 +554,10 @@ namespace WindowsFormsApp1
                 if (i==0)
                 {
                     M_null = Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value);
-                    R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value) - M_null)/2);
+                    R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value) - M_null));
                 }
 
-                L = Math.Abs(Convert.ToDouble(dataGridView2.Rows[i].Cells[3].Value) - Convert.ToDouble(dataGridView2.Rows[i].Cells[4].Value));
+                L = (Math.Abs(Convert.ToDouble(dataGridView2.Rows[i].Cells[3].Value) - Convert.ToDouble(dataGridView2.Rows[i].Cells[4].Value))/2);
                 R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value) - M_null)/2);
                 dataGridView2.Rows[i].Cells[13].Value = L;
                 dataGridView2.Rows[i].Cells[14].Value = R;
@@ -557,8 +587,8 @@ namespace WindowsFormsApp1
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[10].Value = par_A * (sum_Mminus_progn / (dataGridView2.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[10].Value);
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[11].Value = par_A * (sum_alfaplus_progn / (dataGridView2.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[11].Value);
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[12].Value = par_A * (sum_alfaminus_progn / (dataGridView2.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[12].Value);
-            L = Math.Abs(Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count-2].Cells[9].Value) - Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[10].Value));
-            R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[7].Value) - M_null) / 2);
+            L = (Math.Abs(Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count-2].Cells[9].Value) - Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[10].Value))/2);
+            R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[7].Value) - M_null));
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[13].Value = L;
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[14].Value = R;
             if (R - L == 0)
@@ -663,13 +693,24 @@ namespace WindowsFormsApp1
         }
         private void checkedListBox3_SelectedIndexChanged(object sender, EventArgs e)
         {
+            int[] column = new int[dataGridView1.Columns.Count - 1];
+            int count = 0;
             chart6.Series.Clear();
-            Console.WriteLine("decomp4_min {0}", decomp4_min);
-            Console.WriteLine("decomp4_max {0}", decomp4_max);
-            charts_init(chart6, decomp4_min, decomp4_max);
+
             for (int x = 1; x <= checkedListBox3.Items.Count; x++)
             {
-                if (checkedListBox3.GetItemChecked(x-1))
+                if (checkedListBox3.GetItemChecked(x - 1))
+                {
+                    count++;
+                    column[x - 1] = x;
+                }
+
+        }
+
+            Decomp4(dataGridView1, column);
+            for (int x = 1; x <= checkedListBox3.Items.Count; x++)
+            {
+                if (checkedListBox3.GetItemChecked(x - 1))
                 {
                     CreateSerie(0, x, Convert.ToString(x), chart6, true, 1, alpha_minus_min, alpha_plus_max, dataGridView1);
                 }
@@ -1114,11 +1155,11 @@ namespace WindowsFormsApp1
                 if (i == 0)
                 {
                     M_null = Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value);
-                    R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) - M_null) / 2);
+                    R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) - M_null));
                 }
 
-                L = Math.Abs(Convert.ToDouble(dataGridView4.Rows[i].Cells[3].Value) - Convert.ToDouble(dataGridView4.Rows[i].Cells[4].Value));
-                R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) - M_null) / 2);
+                L = (Math.Abs(Convert.ToDouble(dataGridView4.Rows[i].Cells[3].Value) - Convert.ToDouble(dataGridView4.Rows[i].Cells[4].Value))/2);
+                R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) - M_null));
                 dataGridView4.Rows[i].Cells[13].Value = L;
                 dataGridView4.Rows[i].Cells[14].Value = R;
                 if (R - L == 0)
@@ -1147,8 +1188,8 @@ namespace WindowsFormsApp1
             dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[10].Value = par_A * (sum_Mminus_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[10].Value);
             dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[11].Value = par_A * (sum_alfaplus_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[11].Value);
             dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[12].Value = par_A * (sum_alfaminus_progn / (dataGridView4.Rows.Count - 2)) + (1 - par_A) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[12].Value);
-            L = Math.Abs(Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[9].Value) - Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[10].Value));
-            R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[7].Value) - M_null) / 2);
+            L = (Math.Abs(Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[9].Value) - Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[10].Value))/2);
+            R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[7].Value) - M_null));
             dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[13].Value = L;
             dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[14].Value = R;
             if (R - L == 0)

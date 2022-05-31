@@ -605,11 +605,11 @@ namespace WindowsFormsApp1
                 if (i==0)
                 {
                     M_null = Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value);
-                    R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value) - M_null)/2);
+                    R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value) - M_null));
                 }
 
-                L = Math.Abs(Convert.ToDouble(dataGridView2.Rows[i].Cells[3].Value) - Convert.ToDouble(dataGridView2.Rows[i].Cells[4].Value));
-                R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value) - M_null)/2);
+                L = (Math.Abs(Convert.ToDouble(dataGridView2.Rows[i].Cells[3].Value) - Convert.ToDouble(dataGridView2.Rows[i].Cells[4].Value))/2);
+                R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[i].Cells[1].Value) - M_null));
                 dataGridView2.Rows[i].Cells[13].Value = L;
                 dataGridView2.Rows[i].Cells[14].Value = R;
                 if (R-L==0)
@@ -638,8 +638,8 @@ namespace WindowsFormsApp1
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[10].Value = __parameter_A__ * (sum_Mminus_progn / (dataGridView2.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[10].Value);
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[11].Value = __parameter_A__ * (sum_alfaplus_progn / (dataGridView2.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[11].Value);
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[12].Value = __parameter_A__ * (sum_alfaminus_progn / (dataGridView2.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 3].Cells[12].Value);
-            L = Math.Abs(Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count-2].Cells[9].Value) - Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[10].Value));
-            R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[7].Value) - M_null) / 2);
+            L = (Math.Abs(Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count-2].Cells[9].Value) - Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[10].Value))/2);
+            R = Math.Abs((Convert.ToDouble(dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[7].Value) - M_null));
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[13].Value = L;
             dataGridView2.Rows[dataGridView2.Rows.Count - 2].Cells[14].Value = R;
             if (R - L == 0)
@@ -1238,11 +1238,11 @@ namespace WindowsFormsApp1
                 if (i == 0)
                 {
                     M_null = Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value);
-                    R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) - M_null) / 2);
+                    R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) - M_null));
                 }
 
-                L = Math.Abs(Convert.ToDouble(dataGridView4.Rows[i].Cells[3].Value) - Convert.ToDouble(dataGridView4.Rows[i].Cells[4].Value));
-                R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) - M_null) / 2);
+                L = (Math.Abs(Convert.ToDouble(dataGridView4.Rows[i].Cells[3].Value) - Convert.ToDouble(dataGridView4.Rows[i].Cells[4].Value))/2);
+                R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[i].Cells[1].Value) - M_null));
                 dataGridView4.Rows[i].Cells[13].Value = L;
                 dataGridView4.Rows[i].Cells[14].Value = R;
                 if (R - L == 0)
@@ -1271,8 +1271,8 @@ namespace WindowsFormsApp1
             dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[10].Value = __parameter_A__ * (sum_Mminus_progn / (dataGridView4.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[10].Value);
             dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[11].Value = __parameter_A__ * (sum_alfaplus_progn / (dataGridView4.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[11].Value);
             dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[12].Value = __parameter_A__ * (sum_alfaminus_progn / (dataGridView4.Rows.Count - 2)) + (1 - __parameter_A__) * Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 3].Cells[12].Value);
-            L = Math.Abs(Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[9].Value) - Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[10].Value));
-            R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[7].Value) - M_null) / 2);
+            L = (Math.Abs(Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[9].Value) - Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[10].Value))/2);
+            R = Math.Abs((Convert.ToDouble(dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[7].Value) - M_null));
             dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[13].Value = L;
             dataGridView4.Rows[dataGridView4.Rows.Count - 2].Cells[14].Value = R;
             if (R - L == 0)
